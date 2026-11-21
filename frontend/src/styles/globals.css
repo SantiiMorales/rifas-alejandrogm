@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+
+  /* Fondos Sólidos */
+  --bg-main: #05070A;
+  --bg-card: #12161F;
+  --bg-elevated: #1E2430;
+
+  /* Acentos Sólidos Neón / Cyber */
+  --accent-green: #1EE868;
+  --accent-cyan: #00D4FF;
+  --accent-blue: #0077E6;
+  --accent-amber: #EAB308;
+
+  /* Textos y Metales Sólidos */
+  --text-primary: #FFFFFF;
+  --text-secondary: #C4CBD4;
+  --text-muted: #6E7785;
+  --border-metallic: rgba(196, 203, 212, 0.18);
+}
+
+body {
+  background-color: #05070A;
+  color: #FFFFFF;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Tipografía de Marca Sólida */
+.font-brand-slab {
+  font-family: 'Rockwell', 'Roboto Slab', serif;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.font-brand-condensed {
+  font-family: 'Oswald', 'Bebas Neue', 'Impact', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Bordes y Contenedores Sólidos (Cero Degradados) */
+.border-metallic {
+  border: 1px solid rgba(196, 203, 212, 0.18);
+}
+
+.card-metallic {
+  background-color: #12161F;
+  border: 1px solid rgba(196, 203, 212, 0.18);
+  border-radius: 0.5rem;
+}
+
+/* Scrollbar Sólida Dark */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #05070A;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E2430;
+  border-radius: 3px;
+  border: 1px solid #6E7785;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6E7785;
+}
