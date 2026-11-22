@@ -15,43 +15,43 @@ export default function HomePage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#05070A]">
-      <div className="w-full max-w-xl text-center space-y-6">
-        {/* Emblema GM Sólido (Cero Degradados) */}
-        <div className="mx-auto w-16 h-16 rounded-xl bg-[#12161F] border-2 border-[#1EE868] flex items-center justify-center">
-          <span className="font-brand-condensed text-3xl font-black text-[#1EE868]">GM</span>
+    <main className="min-h-dvh flex flex-col items-center justify-center p-3 sm:p-4 bg-[#F4F7FA]">
+      <div className="w-full max-w-xl text-center space-y-5 sm:space-y-6">
+        {/* Emblema GM Autoridad */}
+        <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-[#0B1526] border-2 border-[#CBD5E1] shadow-card flex items-center justify-center">
+          <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#0EA5E9]">GM</span>
         </div>
 
         {/* Título y Marca */}
         <div className="space-y-1">
-          <div className="flex items-center justify-center gap-2">
-            <span className="font-brand-slab text-3xl sm:text-4xl text-white">RIFAS</span>
-            <span className="font-brand-condensed text-4xl sm:text-5xl font-black text-[#1EE868]">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="font-display text-2xl sm:text-4xl font-extrabold text-[#0B1526] tracking-tight">RIFAS</span>
+            <span className="font-display text-3xl sm:text-5xl font-black text-[#0369A1] tracking-tight">
               ALEJANDRO GM
             </span>
           </div>
-          <div className="flex items-center justify-center gap-1.5 text-xs uppercase tracking-widest text-[#00D4FF] font-semibold">
-            <ShieldCheck className="w-4 h-4 text-[#00D4FF]" />
-            <span>Seguridad y Transparencia Garantizada</span>
+          <div className="flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider text-[#059669] font-semibold">
+            <ShieldCheck className="w-4 h-4 text-[#059669] flex-shrink-0" />
+            <span className="truncate">Seguridad y Transparencia Garantizada</span>
           </div>
         </div>
 
         {/* Tarjetas de Selección Rápida */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2 sm:pt-4">
           <button
             onClick={() => router.push('/consultar')}
-            className="bg-[#12161F] p-6 border border-metallic hover:border-[#00D4FF] rounded-xl text-left flex flex-col justify-between transition-colors"
+            className="bg-[#FFFFFF] p-5 sm:p-6 border border-[#DCE4EE] hover:border-[#0369A1] rounded-xl text-left flex flex-col justify-between transition-all shadow-subtle hover:shadow-elevated min-h-[140px]"
           >
             <div>
-              <div className="p-2.5 w-fit rounded-lg bg-[#1E2430] text-[#00D4FF] mb-3">
-                <Ticket className="w-6 h-6" />
+              <div className="p-2.5 w-fit rounded-lg bg-[#E0F2FE] text-[#0369A1] mb-3">
+                <Ticket className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-base font-bold text-white">Consultar Mi Boleto</h3>
-              <p className="text-xs text-[#C4CBD4] mt-1">
+              <h3 className="font-display text-base sm:text-lg font-bold text-[#0B1526]">Consultar Mi Boleto</h3>
+              <p className="text-xs text-[#475569] mt-1 leading-relaxed">
                 Ingresa con tu número o celular para ver tus boletos y abonos oficiales.
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-[#00D4FF] font-bold">
+            <div className="mt-4 flex items-center gap-1.5 text-xs text-[#0369A1] font-semibold">
               <span>Ir al portal público</span>
               <ArrowRight className="w-4 h-4" />
             </div>
@@ -59,18 +59,18 @@ export default function HomePage() {
 
           <button
             onClick={() => router.push('/admin')}
-            className="bg-[#12161F] p-6 border border-metallic hover:border-[#1EE868] rounded-xl text-left flex flex-col justify-between transition-colors"
+            className="bg-[#FFFFFF] p-5 sm:p-6 border border-[#DCE4EE] hover:border-[#0B1526] rounded-xl text-left flex flex-col justify-between transition-all shadow-subtle hover:shadow-elevated min-h-[140px]"
           >
             <div>
-              <div className="p-2.5 w-fit rounded-lg bg-[#1E2430] text-[#1EE868] mb-3">
-                <Lock className="w-6 h-6" />
+              <div className="p-2.5 w-fit rounded-lg bg-[#EAF0F6] text-[#0B1526] mb-3">
+                <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-base font-bold text-white">Panel de Administración</h3>
-              <p className="text-xs text-[#C4CBD4] mt-1">
+              <h3 className="font-display text-base sm:text-lg font-bold text-[#0B1526]">Panel de Administración</h3>
+              <p className="text-xs text-[#475569] mt-1 leading-relaxed">
                 Acceso para control de boletos, abonos y finanzas.
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-[#1EE868] font-bold">
+            <div className="mt-4 flex items-center gap-1.5 text-xs text-[#0B1526] font-semibold">
               <span>Acceder al Tablero</span>
               <ArrowRight className="w-4 h-4" />
             </div>

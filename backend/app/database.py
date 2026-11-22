@@ -3,8 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-# Modo en memoria por defecto usando StaticPool para persistencia entre hilos/conexiones
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
+# SQLite persistente por defecto; usa DATABASE_URL=sqlite:///:memory: para modo en RAM
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./rifas.db")
 
 if DATABASE_URL == "sqlite:///:memory:":
     engine = create_engine(
@@ -28,3 +28,4 @@ def get_db():
         yield db
     finally:
         db.close()
+

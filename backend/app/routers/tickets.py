@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import json
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from ..database import get_db
@@ -47,10 +47,20 @@ def format_ticket(ticket: Ticket, raffle: Raffle) -> TicketResponse:
         for p in sorted(ticket.payments, key=lambda x: x.payment_date, reverse=True)
     ]
 
+    numbers = []
+    if getattr(ticket, "numbers_json", None):
+        try:
+            numbers = json.loads(ticket.numbers_json)
+        except Exception:
+            numbers = [ticket.ticket_number]
+    else:
+        numbers = [ticket.ticket_number]
+
     return TicketResponse(
         id=ticket.id,
         raffle_id=ticket.raffle_id,
         ticket_number=ticket.ticket_number,
+        numbers=numbers,
         customer_name=ticket.customer_name,
         customer_phone=ticket.customer_phone,
         customer_address=ticket.customer_address,
@@ -92,6 +102,7 @@ def get_raffle_tickets(
         query = query.filter(
             or_(
                 Ticket.ticket_number.ilike(term),
+                Ticket.numbers_json.ilike(term),
                 Ticket.customer_name.ilike(term),
                 Ticket.customer_phone.ilike(term),
             )
@@ -143,11 +154,43 @@ def reserve_ticket(
     payload: TicketReserve,
     db: Session = Depends(get_db),
 ):
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    ticket = None
+
+    # 1. Si viene raffle_id y ticket_number, buscar exactamente en esa rifa
+    if payload.raffle_id and payload.ticket_number:
+        ticket = (
+            db.query(Ticket)
+            .filter(
+                Ticket.raffle_id == payload.raffle_id,
+                Ticket.ticket_number == str(payload.ticket_number).strip(),
+            )
+            .first()
+        )
+
+    # 2. Si no se encontró por (raffle_id, ticket_number), buscar por ticket_id
+    if not ticket and ticket_id > 0:
+        ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+
+    # 3. Validar existencia del ticket en la BD
     if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket no encontrado")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="El ticket no existe en esta rifa",
+        )
+
+    # 4. Validar disponibilidad
     if ticket.status != "available":
-        raise HTTPException(status_code=400, detail="Este ticket ya no se encuentra disponible")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este ticket ya no se encuentra disponible",
+        )
+
+    # 5. Validar datos requeridos del comprador
+    if not payload.customer_name or not payload.customer_name.strip() or not payload.customer_phone or not payload.customer_phone.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nombre y celular son obligatorios",
+        )
 
     raffle = db.query(Raffle).filter(Raffle.id == ticket.raffle_id).first()
     rates = db.query(ExchangeRate).first()

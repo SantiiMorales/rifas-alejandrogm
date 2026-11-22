@@ -44,12 +44,13 @@ class Raffle(Base):
     title = Column(String(120), nullable=False)
     description = Column(Text, nullable=True)
     total_numbers = Column(Integer, nullable=False, default=100)
+    scheme = Column(String(50), default="standard_100")
     ticket_price_usd = Column(Float, nullable=False, default=10.0)
     total_investment_usd = Column(Float, nullable=False, default=500.0)
     min_abono_juego_especial = Column(Float, nullable=False, default=5.0)
     # Múltiples juegos especiales en formato JSON:
-    # [{"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0}, {"id": 2, "name": "Sorteo Moto Extra", "min_amount": 5.0}]
-    special_games_json = Column(Text, nullable=True, default='[{"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0}, {"id": 2, "name": "Sorteo Anticipado 2", "min_amount": 5.0}, {"id": 3, "name": "Bono Especial Alejandro GM", "min_amount": 8.0}]')
+    # [{"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0, "draw_date": "2026-12-15"}]
+    special_games_json = Column(Text, nullable=True, default='[{"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0, "draw_date": "2026-12-15"}, {"id": 2, "name": "Sorteo Anticipado 2", "min_amount": 5.0, "draw_date": "2026-12-22"}, {"id": 3, "name": "Bono Especial Alejandro GM", "min_amount": 8.0, "draw_date": "2026-12-30"}]')
     status = Column(String(20), default="active")  # active, completed
     created_at = Column(DateTime, default=utcnow)
 
@@ -62,6 +63,7 @@ class Ticket(Base):
     id = Column(Integer, primary_key=True, index=True)
     raffle_id = Column(Integer, ForeignKey("raffles.id"), nullable=False)
     ticket_number = Column(String(20), index=True, nullable=False)
+    numbers_json = Column(Text, nullable=True)
     customer_name = Column(String(100), nullable=True)
     customer_phone = Column(String(50), index=True, nullable=True)
     customer_address = Column(String(200), nullable=True)

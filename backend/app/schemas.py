@@ -5,9 +5,26 @@ from pydantic import BaseModel, Field
 
 # --- Special Games ---
 class SpecialGameItem(BaseModel):
-    id: int
-    name: str
-    min_amount: float
+    id: Optional[int] = 1
+    name: str = Field(..., min_length=1)
+    min_amount: Optional[float] = Field(default=3.0, ge=0)
+    minAmount: Optional[float] = None
+    min_payment: Optional[float] = None
+    draw_date: Optional[str] = None
+    drawDate: Optional[str] = None
+
+    def get_min_amount(self) -> float:
+        if self.min_amount is not None:
+            return float(self.min_amount)
+        if self.minAmount is not None:
+            return float(self.minAmount)
+        if self.min_payment is not None:
+            return float(self.min_payment)
+        return 3.0
+
+    def get_draw_date(self) -> Optional[str]:
+        d = self.draw_date or self.drawDate
+        return d.strip() if d and d.strip() else None
 
 
 # --- Exchange Rates ---
@@ -59,6 +76,8 @@ class PaymentResponse(BaseModel):
 
 # --- Tickets ---
 class TicketReserve(BaseModel):
+    raffle_id: Optional[int] = None
+    ticket_number: Optional[str] = None
     customer_name: str = Field(..., min_length=2)
     customer_phone: str = Field(..., min_length=4)
     customer_address: Optional[str] = None
@@ -71,6 +90,7 @@ class TicketResponse(BaseModel):
     id: int
     raffle_id: int
     ticket_number: str
+    numbers: List[str] = []
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
     customer_address: Optional[str] = None
@@ -90,13 +110,37 @@ class TicketResponse(BaseModel):
 
 # --- Raffles ---
 class RaffleCreate(BaseModel):
-    title: str = Field(..., min_length=3)
+    title: str = Field(..., min_length=2)
     description: Optional[str] = None
-    total_numbers: int = Field(100, ge=10, le=10000)
-    ticket_price_usd: float = Field(10.0, gt=0)
-    total_investment_usd: float = Field(500.0, ge=0)
-    min_abono_juego_especial: Optional[float] = Field(5.0, ge=0)
+    total_numbers: Optional[int] = Field(default=None, ge=10, le=10000)
+    total_tickets: Optional[int] = Field(default=None, ge=10, le=10000)
+    scheme: Optional[str] = "standard_100"
+    ticket_price_usd: Optional[float] = Field(default=None, gt=0)
+    ticket_price: Optional[float] = Field(default=None, gt=0)
+    total_investment_usd: Optional[float] = Field(default=None, ge=0)
+    total_investment: Optional[float] = Field(default=None, ge=0)
+    investment: Optional[float] = Field(default=None, ge=0)
+    min_abono_juego_especial: Optional[float] = Field(default=None, ge=0)
+    min_payment: Optional[float] = Field(default=None, ge=0)
     special_games: Optional[List[SpecialGameItem]] = None
+
+    def get_total_numbers(self) -> int:
+        return self.total_numbers or self.total_tickets or 100
+
+    def get_ticket_price(self) -> float:
+        return self.ticket_price_usd or self.ticket_price or 10.0
+
+    def get_total_investment(self) -> float:
+        if self.total_investment_usd is not None:
+            return self.total_investment_usd
+        if self.total_investment is not None:
+            return self.total_investment
+        if self.investment is not None:
+            return self.investment
+        return 400.0
+
+    def get_min_abono(self) -> float:
+        return self.min_abono_juego_especial or self.min_payment or 3.0
 
 
 class RaffleResponse(BaseModel):
@@ -104,6 +148,7 @@ class RaffleResponse(BaseModel):
     title: str
     description: Optional[str] = None
     total_numbers: int
+    scheme: Optional[str] = "standard_100"
     ticket_price_usd: float
     total_investment_usd: float
     min_abono_juego_especial: float
@@ -140,6 +185,12 @@ class FinanceChartDataPoint(BaseModel):
     cop_in_usd: float
     bs_in_usd: float
     total_usd: float
+    cop_amount: Optional[float] = 0.0
+    bs_amount: Optional[float] = 0.0
+    count_usd: Optional[int] = 0
+    count_cop: Optional[int] = 0
+    count_bs: Optional[int] = 0
+    count_total: Optional[int] = 0
 
 
 class DailySaleItem(BaseModel):

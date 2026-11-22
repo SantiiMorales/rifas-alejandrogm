@@ -77,11 +77,13 @@ def get_finance_chart(
     now = datetime.now(timezone.utc)
     data_points = []
 
+    SPANISH_DAYS_SHORT = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+
     if period == "day":
         for d in range(6, -1, -1):
             day_start = (now - timedelta(days=d)).replace(hour=0, minute=0, second=0, microsecond=0)
             day_end = day_start + timedelta(days=1)
-            label = day_start.strftime("%a %d/%m")
+            label = f"{SPANISH_DAYS_SHORT[day_start.weekday()]} {day_start.strftime('%d/%m')}"
 
             payments = (
                 db.query(Payment)
@@ -94,6 +96,13 @@ def get_finance_chart(
             bs_in_usd = sum(p.amount_usd_equivalent for p in payments if p.currency == "BS")
             total = sum(p.amount_usd_equivalent for p in payments)
 
+            cop_amount = sum(p.amount for p in payments if p.currency == "COP")
+            bs_amount = sum(p.amount for p in payments if p.currency == "BS")
+            count_usd = sum(1 for p in payments if p.currency == "USD")
+            count_cop = sum(1 for p in payments if p.currency == "COP")
+            count_bs = sum(1 for p in payments if p.currency == "BS")
+            count_total = len(payments)
+
             data_points.append(
                 FinanceChartDataPoint(
                     date_label=label,
@@ -101,6 +110,12 @@ def get_finance_chart(
                     cop_in_usd=round(cop_in_usd, 2),
                     bs_in_usd=round(bs_in_usd, 2),
                     total_usd=round(total, 2),
+                    cop_amount=round(cop_amount, 2),
+                    bs_amount=round(bs_amount, 2),
+                    count_usd=count_usd,
+                    count_cop=count_cop,
+                    count_bs=count_bs,
+                    count_total=count_total,
                 )
             )
     else:
@@ -120,6 +135,13 @@ def get_finance_chart(
             bs_in_usd = sum(p.amount_usd_equivalent for p in payments if p.currency == "BS")
             total = sum(p.amount_usd_equivalent for p in payments)
 
+            cop_amount = sum(p.amount for p in payments if p.currency == "COP")
+            bs_amount = sum(p.amount for p in payments if p.currency == "BS")
+            count_usd = sum(1 for p in payments if p.currency == "USD")
+            count_cop = sum(1 for p in payments if p.currency == "COP")
+            count_bs = sum(1 for p in payments if p.currency == "BS")
+            count_total = len(payments)
+
             data_points.append(
                 FinanceChartDataPoint(
                     date_label=label,
@@ -127,6 +149,12 @@ def get_finance_chart(
                     cop_in_usd=round(cop_in_usd, 2),
                     bs_in_usd=round(bs_in_usd, 2),
                     total_usd=round(total, 2),
+                    cop_amount=round(cop_amount, 2),
+                    bs_amount=round(bs_amount, 2),
+                    count_usd=count_usd,
+                    count_cop=count_cop,
+                    count_bs=count_bs,
+                    count_total=count_total,
                 )
             )
 

@@ -6,30 +6,31 @@ from .auth import hash_password
 
 
 def seed_initial_data(db: Session):
-    if db.query(User).first():
+    # 1. Asegurar Admin
+    if not db.query(User).first():
+        admin = User(
+            username="admin",
+            password_hash=hash_password("admin123"),
+            is_admin=True,
+        )
+        db.add(admin)
+        db.commit()
+
+    # 2. Asegurar Exchange Rates
+    if not db.query(ExchangeRate).first():
+        rates = ExchangeRate(
+            rate_bs_to_cop=70.0,
+            rate_bs_to_usd=60.0,
+            rate_cop_to_usd=4200.0,
+            cop_per_usd=4200.0,
+            bs_per_usd=60.0,
+        )
+        db.add(rates)
+        db.commit()
+
+    # 3. Solo crear rifa semilla si la tabla de rifas está COMPLETAMENTE VACÍA
+    if db.query(Raffle).first():
         return
-
-    # 1. Admin
-    admin = User(
-        username="admin",
-        password_hash=hash_password("admin123"),
-        is_admin=True,
-    )
-    db.add(admin)
-
-    # 2. Exchange Rates con fórmulas solicitadas
-    # - Bolivares a Pesos: Cantidad de Bs * Taza = Pesos (ej: 70)
-    # - Bolivares a Dolares: Cantidad de Bs / Taza = Dolares (ej: 600 Bs / 60 = 10 USD)
-    # - Pesos a Dolares: Cantidad de pesos / Taza = Dolares (ej: 42000 COP / 4200 = 10 USD)
-    rates = ExchangeRate(
-        rate_bs_to_cop=70.0,
-        rate_bs_to_usd=60.0,
-        rate_cop_to_usd=4200.0,
-        cop_per_usd=4200.0,
-        bs_per_usd=60.0,
-    )
-    db.add(rates)
-    db.commit()
 
     # 3. Rifa inicial con múltiples juegos especiales
     special_games = [

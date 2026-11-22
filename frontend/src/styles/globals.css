@@ -3,71 +3,128 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Fondos Sólidos */
-  --bg-main: #05070A;
-  --bg-card: #12161F;
-  --bg-elevated: #1E2430;
+  /* Fondo Base */
+  --bg-canvas: #F4F7FA;
+  --bg-surface: #FFFFFF;
+  --bg-surface-secondary: #EAF0F6;
 
-  /* Acentos Sólidos Neón / Cyber */
-  --accent-green: #1EE868;
-  --accent-cyan: #00D4FF;
-  --accent-blue: #0077E6;
-  --accent-amber: #EAB308;
+  /* Textos y Contraste */
+  --text-primary: #0B1526;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-muted: #94A3B8;
 
-  /* Textos y Metales Sólidos */
-  --text-primary: #FFFFFF;
-  --text-secondary: #C4CBD4;
-  --text-muted: #6E7785;
-  --border-metallic: rgba(196, 203, 212, 0.18);
+  /* Bordes */
+  --border-metallic: #DCE4EE;
+  --border-subtle: #DCE4EE;
+  --border-strong: #CBD5E1;
+
+  /* Colores de Marca y Acento */
+  --primary: #0369A1;
+  --primary-hover: #075985;
+  --accent-electric: #0EA5E9;
+  --accent-emerald: #059669;
+  --accent-emerald-hover: #047857;
+
+  /* Sombras sutiles pizarra */
+  --shadow-subtle: 0 1px 3px 0 rgba(11, 21, 38, 0.06);
 }
 
 body {
-  background-color: #05070A;
-  color: #FFFFFF;
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow-x: hidden;
+  background-color: #F4F7FA;
+  color: #0B1526;
+  min-height: 100dvh;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  line-height: 1.6;
 }
 
-/* Tipografía de Marca Sólida */
-.font-brand-slab {
-  font-family: 'Rockwell', 'Roboto Slab', serif;
-  font-weight: 900;
-  letter-spacing: 0.05em;
+/* Ajustes ópticos globales para títulos */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-wrap: balance;
 }
 
-.font-brand-condensed {
-  font-family: 'Oswald', 'Bebas Neue', 'Impact', sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+/* Números tabulares para datos financieros, contadores y boletos */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-/* Bordes y Contenedores Sólidos (Cero Degradados) */
+/* Párrafos largos con text-wrap pretty */
+p {
+  text-wrap: pretty;
+}
+
+/* Utilidades de Bordes y Superficies en Light Mode */
 .border-metallic {
-  border: 1px solid rgba(196, 203, 212, 0.18);
+  border: 1px solid #DCE4EE;
 }
 
 .card-metallic {
-  background-color: #12161F;
-  border: 1px solid rgba(196, 203, 212, 0.18);
+  background-color: #FFFFFF;
+  border: 1px solid #DCE4EE;
   border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(11, 21, 38, 0.06);
 }
 
-/* Scrollbar Sólida Dark */
+/* Micro-interacciones y Animaciones Fluidas Fintech */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar Sólida Light Mode */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #05070A;
+  background: #F4F7FA;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E2430;
+  background: #CBD5E1;
   border-radius: 3px;
-  border: 1px solid #6E7785;
+  border: 1px solid #E2E8F0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6E7785;
+  background: #94A3B8;
 }

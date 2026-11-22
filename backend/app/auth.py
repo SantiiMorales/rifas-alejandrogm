@@ -9,9 +9,12 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 
-SECRET_KEY = os.getenv("SECRET_KEY", "rifas-alejandro-gm-super-secret-key-2026-cyberpunk")
+_DEFAULT_SECRET = "rifas-alejandro-gm-super-secret-key-2026-cyberpunk"
+SECRET_KEY = os.getenv("SECRET_KEY", _DEFAULT_SECRET)
+if SECRET_KEY == _DEFAULT_SECRET:
+    print("[SECURITY WARNING] SECRET_KEY no configurada. Define SECRET_KEY en las variables de entorno antes de producción.")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 días
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 horas
 
 security = HTTPBearer()
 

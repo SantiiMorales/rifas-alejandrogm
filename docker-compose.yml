@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  api:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/rifas.db
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
+    volumes:
+      - rifas_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  rifas_data:

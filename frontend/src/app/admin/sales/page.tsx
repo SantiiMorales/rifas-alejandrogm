@@ -38,34 +38,34 @@ export default function DailySalesPage() {
   };
 
   return (
-    <div className="space-y-5">
-      {/* Banner Principal Sólido Cero Degradados */}
-      <div className="bg-[#12161F] p-5 border border-metallic rounded-lg space-y-4">
+    <div className="space-y-4 sm:space-y-5 animate-fade-in-up">
+      {/* Banner Principal */}
+      <div className="bg-[#FFFFFF] p-4 sm:p-5 border border-[#DCE4EE] rounded-lg shadow-subtle space-y-4">
         {/* Encabezado con selector de fecha integrado */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded bg-[#00D4FF] text-black text-[10px] font-black uppercase">
+              <span className="px-2 py-0.5 rounded bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] text-[10px] font-semibold uppercase tracking-wider">
                 Panel Contable
               </span>
-              <span className="text-xs text-[#6E7785]">Auditoría de Pagos</span>
+              <span className="text-xs text-[#64748B]">Auditoría de Pagos</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wide mt-1">
+            <h1 className="font-display text-lg sm:text-2xl font-black text-[#0B1526] uppercase tracking-tight mt-1 truncate">
               Ventas y Abonos del Día
             </h1>
-            <p className="text-xs text-[#C4CBD4] mt-0.5">
+            <p className="text-xs text-[#475569] mt-0.5">
               Registro cronológico de transacciones por fecha seleccionada
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 bg-[#1E2430] border border-metallic rounded-lg px-3 py-1.5 transition-colors focus-within:border-[#00D4FF]">
-              <Calendar className="w-4 h-4 text-[#00D4FF] flex-shrink-0" />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex-1 sm:flex-initial flex items-center gap-2 bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg px-3 py-2 sm:py-1.5 min-h-[44px] transition-all focus-within:border-[#0EA5E9] focus-within:bg-[#FFFFFF] focus-within:ring-2 focus-within:ring-[#0EA5E9] focus-within:ring-offset-1">
+              <Calendar className="w-4 h-4 text-[#0369A1] flex-shrink-0" />
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer"
+                className="bg-transparent text-[#0B1526] text-base sm:text-xs font-semibold focus:outline-none cursor-pointer w-full font-mono tabular-nums"
               />
             </div>
 
@@ -75,127 +75,135 @@ export default function DailySalesPage() {
                 loadSales(selectedDate);
               }}
               disabled={refreshing}
-              className="p-2 bg-[#1E2430] hover:bg-[#1E2430]/70 text-[#C4CBD4] hover:text-white border border-metallic rounded-lg transition-colors flex items-center justify-center"
+              className="min-h-[44px] min-w-[44px] p-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] active:scale-[0.98] text-[#475569] hover:text-[#0B1526] border border-[#CBD5E1] rounded-lg shadow-subtle transition-all duration-150 flex items-center justify-center flex-shrink-0 focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
               title="Refrescar ventas"
+              aria-label="Refrescar ventas"
             >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#0369A1]' : ''}`} />
             </button>
           </div>
         </div>
 
-        {/* Contenedor Encapsulado de Métricas del Día */}
-        <div className="p-2.5 sm:p-3 bg-[#05070A] border border-metallic rounded-lg grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="p-3 bg-[#12161F] border border-metallic rounded-lg flex items-center gap-3">
-            <div className="p-2 bg-[#1E2430] rounded-lg border border-metallic flex items-center justify-center flex-shrink-0">
-              <Receipt className="w-4 h-4 text-white" />
+        {/* Contenedor Encapsulado de Métricas del Día con micro-interacciones */}
+        <div className="p-2.5 sm:p-3 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {/* Transacciones */}
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle hover:-translate-y-0.5 hover:shadow-md hover:border-[#0369A1]/30 transition-all duration-200 ease-out flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-2 bg-[#EAF0F6] rounded-lg border border-[#DCE4EE] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <Receipt className="w-4 h-4 text-[#475569]" />
             </div>
-            <div>
-              <span className="text-[10px] text-[#6E7785] uppercase block font-semibold">
+            <div className="min-w-0">
+              <span className="text-[10px] text-[#64748B] uppercase block font-semibold truncate">
                 Transacciones
               </span>
-              <span className="text-lg font-black text-white block">
+              <span className="font-mono tabular-nums text-base sm:text-lg font-bold text-[#0B1526] block truncate">
                 {data.total_sales_count}
               </span>
             </div>
           </div>
 
-          <div className="p-3 bg-[#12161F] border border-metallic rounded-lg flex items-center gap-3">
-            <div className="p-2 bg-[#1E2430] rounded-lg border border-[#1EE868]/30 flex items-center justify-center flex-shrink-0">
-              <DollarSign className="w-4 h-4 text-[#1EE868]" />
+          {/* USD Directo */}
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle hover:-translate-y-0.5 hover:shadow-md hover:border-[#059669]/40 transition-all duration-200 ease-out flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-2 bg-[#ECFDF5] rounded-lg border border-[#A7F3D0] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <DollarSign className="w-4 h-4 text-[#059669]" />
             </div>
-            <div>
-              <span className="text-[10px] text-[#1EE868] uppercase block font-semibold">
+            <div className="min-w-0">
+              <span className="text-[10px] text-[#059669] uppercase block font-semibold truncate">
                 USD Directo
               </span>
-              <span className="text-lg font-black text-[#1EE868] block">
-                ${data.total_usd.toLocaleString()}
+              <span className="font-mono tabular-nums text-base sm:text-lg font-bold text-[#059669] block truncate">
+                ${data.total_usd.toLocaleString('es-ES')}
               </span>
             </div>
           </div>
 
-          <div className="p-3 bg-[#12161F] border border-metallic rounded-lg flex items-center gap-3">
-            <div className="p-2 bg-[#1E2430] rounded-lg border border-[#00D4FF]/30 flex items-center justify-center flex-shrink-0">
-              <Wallet className="w-4 h-4 text-[#00D4FF]" />
+          {/* COP en Pesos */}
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle hover:-translate-y-0.5 hover:shadow-md hover:border-[#0369A1]/40 transition-all duration-200 ease-out flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-2 bg-[#E0F2FE] rounded-lg border border-[#BAE6FD] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <Wallet className="w-4 h-4 text-[#0369A1]" />
             </div>
-            <div>
-              <span className="text-[10px] text-[#00D4FF] uppercase block font-semibold">
+            <div className="min-w-0">
+              <span className="text-[10px] text-[#0369A1] uppercase block font-semibold truncate">
                 COP en Pesos
               </span>
-              <span className="text-lg font-black text-[#00D4FF] block">
-                ${data.total_cop.toLocaleString()}
+              <span className="font-mono tabular-nums text-base sm:text-lg font-bold text-[#0369A1] block truncate">
+                ${data.total_cop.toLocaleString('es-ES')}
               </span>
             </div>
           </div>
 
-          <div className="p-3 bg-[#12161F] border border-metallic rounded-lg flex items-center gap-3">
-            <div className="p-2 bg-[#1E2430] rounded-lg border border-[#0077E6]/30 flex items-center justify-center flex-shrink-0">
-              <Coins className="w-4 h-4 text-[#0077E6]" />
+          {/* BS en Bolívares */}
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle hover:-translate-y-0.5 hover:shadow-md hover:border-[#0284C7]/40 transition-all duration-200 ease-out flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-2 bg-[#E0F2FE] rounded-lg border border-[#BAE6FD] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <Coins className="w-4 h-4 text-[#0284C7]" />
             </div>
-            <div>
-              <span className="text-[10px] text-[#0077E6] uppercase block font-semibold">
+            <div className="min-w-0">
+              <span className="text-[10px] text-[#0284C7] uppercase block font-semibold truncate">
                 BS en Bolívares
               </span>
-              <span className="text-lg font-black text-white block">
-                Bs. {data.total_bs.toLocaleString()}
+              <span className="font-mono tabular-nums text-base sm:text-lg font-bold text-[#0B1526] block truncate">
+                Bs. {data.total_bs.toLocaleString('es-ES')}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabla Sólida de Registros */}
-      <div className="bg-[#12161F] border border-metallic rounded-lg overflow-hidden">
-        <div className="p-3.5 bg-[#1E2430] border-b border-metallic flex items-center justify-between">
-          <h2 className="text-xs font-bold text-white uppercase flex items-center gap-1.5">
-            <Receipt className="w-4 h-4 text-[#00D4FF]" />
-            Transacciones del {selectedDate}
+      {/* Tabla de Registros */}
+      <div className="bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle overflow-hidden">
+        <div className="p-3.5 bg-[#F4F7FA] border-b border-[#DCE4EE] flex items-center justify-between">
+          <h2 className="font-display text-xs font-bold text-[#0B1526] uppercase flex items-center gap-1.5">
+            <Receipt className="w-4 h-4 text-[#0369A1]" />
+            <span>Detalle de Cobros Registrados ({data.sales.length})</span>
           </h2>
-          <span className="text-[11px] text-[#6E7785] px-2 py-0.5 bg-[#05070A] border border-metallic rounded-md">
-            {data.sales.length} registros
-          </span>
         </div>
 
         {data.sales.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[#6E7785]">
-            No hay ventas registradas el {selectedDate}.
+          <div className="p-8 text-center text-xs text-[#64748B]">
+            No se registraron cobros ni ventas para esta fecha.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#05070A] text-[#6E7785] uppercase text-[10px] border-b border-metallic">
-                <tr>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#F8FAFC] border-b border-[#DCE4EE] text-[#64748B] font-semibold text-[11px] uppercase tracking-wider">
                   <th className="py-2.5 px-3">Hora</th>
                   <th className="py-2.5 px-3">Boleto</th>
                   <th className="py-2.5 px-3">Cliente</th>
-                  <th className="py-2.5 px-3">Celular</th>
-                  <th className="py-2.5 px-3">Monto</th>
-                  <th className="py-2.5 px-3">USD Equiv.</th>
-                  <th className="py-2.5 px-3">Nota</th>
+                  <th className="py-2.5 px-3">Teléfono</th>
+                  <th className="py-2.5 px-3">Monto Pagado</th>
+                  <th className="py-2.5 px-3">Equivalente USD</th>
+                  <th className="py-2.5 px-3">Detalle / Notas</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-metallic text-[#C4CBD4]">
-                {data.sales.map((sale) => (
-                  <tr key={sale.payment_id} className="hover:bg-[#1E2430] transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[#6E7785]">
-                      {formatTime(sale.payment_date)}
+              <tbody className="divide-y divide-[#DCE4EE]">
+                {data.sales.map((item, idx) => (
+                  <tr
+                    key={idx}
+                    className="hover:bg-[#F4F7FA] transition-colors duration-150"
+                  >
+                    <td className="py-2.5 px-3 font-mono tabular-nums text-[#475569]">
+                      {formatTime(item.payment_date)}
                     </td>
-                    <td className="py-2.5 px-3 font-bold text-[#00D4FF] font-brand-condensed text-base">
-                      #{sale.ticket_number}
+                    <td className="py-2.5 px-3">
+                      <span className="font-mono tabular-nums font-bold px-1.5 py-0.5 rounded bg-[#EAF0F6] border border-[#CBD5E1] text-[#0B1526]">
+                        #{item.ticket_number}
+                      </span>
                     </td>
-                    <td className="py-2.5 px-3 font-semibold text-white">
-                      {sale.customer_name}
+                    <td className="py-2.5 px-3 font-medium text-[#0B1526]">
+                      {item.customer_name}
                     </td>
-                    <td className="py-2.5 px-3 text-[#00D4FF] font-mono">
-                      {sale.customer_phone}
+                    <td className="py-2.5 px-3 font-mono tabular-nums text-[#475569]">
+                      {item.customer_phone || '-'}
                     </td>
-                    <td className="py-2.5 px-3 font-bold text-white">
-                      {sale.amount.toLocaleString()} {sale.currency}
+                    <td className="py-2.5 px-3 font-mono tabular-nums font-bold text-[#0B1526]">
+                      {item.currency === 'BS' ? 'Bs. ' : '$'}
+                      {item.amount.toLocaleString('es-ES')} {item.currency}
                     </td>
-                    <td className="py-2.5 px-3 font-semibold text-[#1EE868]">
-                      ${sale.amount_usd.toFixed(2)} USD
+                    <td className="py-2.5 px-3 font-mono tabular-nums font-bold text-[#059669]">
+                      ${item.amount_usd.toLocaleString('es-ES')} USD
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] text-[#6E7785]">
-                      {sale.notes || '—'}
+                    <td className="py-2.5 px-3 text-[#64748B] italic max-w-[200px] truncate">
+                      {item.notes || 'Abono registrado'}
                     </td>
                   </tr>
                 ))}

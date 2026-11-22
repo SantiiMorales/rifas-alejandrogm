@@ -22,7 +22,13 @@ def enrich_raffle_response(raffle: Raffle, db: Session) -> RaffleResponse:
         try:
             raw_games = json.loads(raffle.special_games_json)
             special_games_list = [
-                SpecialGameItem(id=g.get("id", i + 1), name=g["name"], min_amount=float(g["min_amount"]))
+                SpecialGameItem(
+                    id=g.get("id", i + 1),
+                    name=g["name"],
+                    min_amount=float(g["min_amount"]),
+                    draw_date=g.get("draw_date") or g.get("drawDate"),
+                    drawDate=g.get("drawDate") or g.get("draw_date"),
+                )
                 for i, g in enumerate(raw_games)
             ]
         except Exception:
@@ -33,6 +39,7 @@ def enrich_raffle_response(raffle: Raffle, db: Session) -> RaffleResponse:
         title=raffle.title,
         description=raffle.description,
         total_numbers=raffle.total_numbers,
+        scheme=raffle.scheme or "standard_100",
         ticket_price_usd=raffle.ticket_price_usd,
         total_investment_usd=raffle.total_investment_usd,
         min_abono_juego_especial=raffle.min_abono_juego_especial,
@@ -56,10 +63,40 @@ def get_active_raffle(db: Session = Depends(get_db)):
         .first()
     )
     if not raffle:
+        # Fallback a la más reciente creada
+        raffle = db.query(Raffle).order_by(Raffle.id.desc()).first()
+
+    if not raffle:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No hay ninguna rifa activa en este momento",
         )
+    return enrich_raffle_response(raffle, db)
+
+
+@router.get("/{raffle_id}", response_model=RaffleResponse)
+def get_raffle_by_id(raffle_id: int, db: Session = Depends(get_db)):
+    raffle = db.query(Raffle).filter(Raffle.id == raffle_id).first()
+    if not raffle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Rifa no encontrada",
+        )
+    return enrich_raffle_response(raffle, db)
+
+
+@router.put("/{raffle_id}/activate", response_model=RaffleResponse)
+def activate_raffle(raffle_id: int, db: Session = Depends(get_db)):
+    raffle = db.query(Raffle).filter(Raffle.id == raffle_id).first()
+    if not raffle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Rifa no encontrada",
+        )
+    db.query(Raffle).filter(Raffle.status == "active").update({"status": "completed"})
+    raffle.status = "active"
+    db.commit()
+    db.refresh(raffle)
     return enrich_raffle_response(raffle, db)
 
 
@@ -74,26 +111,45 @@ def create_raffle(
     payload: RaffleCreate,
     db: Session = Depends(get_db),
 ):
-    db.query(Raffle).filter(Raffle.status == "active").update({"status": "completed"})
+    # Marcar rifas activas anteriores como archivadas en la misma transacción
+    db.query(Raffle).filter(Raffle.status == "active").update({"status": "archived"})
+
+    total_numbers = payload.get_total_numbers()
+    ticket_price_usd = payload.get_ticket_price()
+    total_investment_usd = payload.get_total_investment()
+    min_abono = payload.get_min_abono()
+    scheme = payload.scheme or (
+        "triples_333" if total_numbers == 333 else "pairs_500" if total_numbers == 500 else "standard_100"
+    )
 
     special_games_json = "[]"
-    if payload.special_games:
-        special_games_json = json.dumps([g.dict() for g in payload.special_games])
+    if payload.special_games and len(payload.special_games) > 0:
+        games_list = []
+        for i, g in enumerate(payload.special_games):
+            games_list.append({
+                "id": g.id if g.id is not None else i + 1,
+                "name": g.name.strip(),
+                "min_amount": g.get_min_amount(),
+                "draw_date": g.get_draw_date(),
+                "drawDate": g.get_draw_date(),
+            })
+        special_games_json = json.dumps(games_list)
     else:
         # Default games
         special_games_json = json.dumps([
-            {"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0},
-            {"id": 2, "name": "Sorteo Anticipado 2", "min_amount": 5.0},
-            {"id": 3, "name": "Sorteo Especial Fin de Semana", "min_amount": 8.0},
+            {"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0, "draw_date": None, "drawDate": None},
+            {"id": 2, "name": "Sorteo Anticipado 2", "min_amount": 5.0, "draw_date": None, "drawDate": None},
+            {"id": 3, "name": "Sorteo Especial Fin de Semana", "min_amount": 8.0, "draw_date": None, "drawDate": None},
         ])
 
     new_raffle = Raffle(
-        title=payload.title,
-        description=payload.description,
-        total_numbers=payload.total_numbers,
-        ticket_price_usd=payload.ticket_price_usd,
-        total_investment_usd=payload.total_investment_usd,
-        min_abono_juego_especial=payload.min_abono_juego_especial or 5.0,
+        title=payload.title.strip(),
+        description=payload.description.strip() if payload.description and payload.description.strip() else None,
+        total_numbers=total_numbers,
+        scheme=scheme,
+        ticket_price_usd=ticket_price_usd,
+        total_investment_usd=total_investment_usd,
+        min_abono_juego_especial=min_abono,
         special_games_json=special_games_json,
         status="active",
     )
@@ -101,18 +157,52 @@ def create_raffle(
     db.commit()
     db.refresh(new_raffle)
 
-    padding = len(str(payload.total_numbers - 1))
     tickets_to_create = []
-    for i in range(payload.total_numbers):
-        num_str = str(i).zfill(padding)
-        tickets_to_create.append(
-            Ticket(
-                raffle_id=new_raffle.id,
-                ticket_number=num_str,
-                status="available",
-                total_paid_usd=0.0,
+    if scheme == "triples_333" or total_numbers == 333:
+        for i in range(1, 334):
+            n1 = str(i).zfill(3)
+            n2 = str(i + 333).zfill(3)
+            n3 = str(1000 - i).zfill(3)
+            ticket_number = str(i).zfill(3)
+            tickets_to_create.append(
+                Ticket(
+                    raffle_id=new_raffle.id,
+                    ticket_number=ticket_number,
+                    numbers_json=json.dumps([n1, n2, n3]),
+                    status="available",
+                    total_paid_usd=0.0,
+                )
             )
-        )
+    elif scheme == "pairs_500" or total_numbers == 500:
+        for row in range(50):
+            for col in range(10):
+                p1_val = row * 10 + col
+                p2_val = 500 + ((p1_val + 12) % 500)
+                p1 = str(p1_val).zfill(3)
+                p2 = str(p2_val).zfill(3)
+                ticket_number = str(p1_val).zfill(3)
+                tickets_to_create.append(
+                    Ticket(
+                        raffle_id=new_raffle.id,
+                        ticket_number=ticket_number,
+                        numbers_json=json.dumps([p1, p2]),
+                        status="available",
+                        total_paid_usd=0.0,
+                    )
+                )
+    else:
+        padding = len(str(total_numbers - 1))
+        for i in range(total_numbers):
+            num_str = str(i).zfill(padding)
+            tickets_to_create.append(
+                Ticket(
+                    raffle_id=new_raffle.id,
+                    ticket_number=num_str,
+                    numbers_json=json.dumps([num_str]),
+                    status="available",
+                    total_paid_usd=0.0,
+                )
+            )
     db.bulk_save_objects(tickets_to_create)
     db.commit()
 

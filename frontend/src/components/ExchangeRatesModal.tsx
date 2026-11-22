@@ -29,6 +29,17 @@ export default function ExchangeRatesModal({
   const [loading, setLoading] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
+  // Escuchar tecla Escape para cerrar modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     setRateBsToCop(rates.rate_bs_to_cop || 70.0);
     setRateBsToUsd(rates.rate_bs_to_usd || 60.0);
@@ -37,7 +48,6 @@ export default function ExchangeRatesModal({
 
   if (!isOpen) return null;
 
-  // Cálculos de demostración interactiva en tiempo real
   const demoBs = 100;
   const demoCopFromBs = Math.round(demoBs * rateBsToCop);
   const demoUsdFromBs = (demoBs / (rateBsToUsd || 1)).toFixed(2);
@@ -68,26 +78,27 @@ export default function ExchangeRatesModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg bg-[#12161F] border border-metallic rounded-lg p-5 sm:p-6 shadow-2xl space-y-4">
-        {/* Cabecera Encapsulada con rounded-lg */}
-        <div className="p-3 bg-[#05070A] border border-metallic rounded-lg flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-[#1E2430] border border-metallic text-[#00D4FF] flex items-center justify-center flex-shrink-0">
-              <ArrowRightLeft className="w-5 h-5 text-[#00D4FF]" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm">
+      <div className="relative w-[calc(100%-1rem)] sm:w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg p-4 sm:p-6 shadow-modal space-y-4 animate-scale-in">
+        {/* Cabecera Encapsulada */}
+        <div className="p-3 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] flex items-center justify-center flex-shrink-0">
+              <ArrowRightLeft className="w-5 h-5 text-[#0369A1]" />
             </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-display font-bold text-[#0B1526] uppercase tracking-wider truncate">
                 Panel de Tasas de Conversión
               </h2>
-              <p className="text-[11px] text-[#C4CBD4]">
+              <p className="text-[11px] text-[#475569] truncate">
                 Bs × Tasa = Pesos · Bs ÷ Tasa = USD · COP ÷ Tasa = USD
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-[#6E7785] hover:text-white hover:bg-[#1E2430] transition-colors"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg text-[#64748B] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors flex-shrink-0"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -95,144 +106,144 @@ export default function ExchangeRatesModal({
 
         <form onSubmit={handleSave} className="space-y-3.5 text-xs">
           {/* FÓRMULA 1: Bolívares a Pesos */}
-          <div className="p-3.5 bg-[#05070A] border border-metallic rounded-lg space-y-2.5">
-            <div className="flex items-center justify-between pb-0.5">
+          <div className="p-3.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg space-y-2.5">
+            <div className="flex items-center justify-between pb-0.5 gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#00D4FF]" />
-                <span className="font-bold text-[#00D4FF] uppercase tracking-wider text-xs">
+                <span className="w-2 h-2 rounded-full bg-[#0369A1]" />
+                <span className="font-bold text-[#0369A1] uppercase tracking-wider text-xs">
                   1. Bolívares a Pesos (COP)
                 </span>
               </div>
-              <span className="text-[10px] text-[#6E7785] font-mono px-2 py-0.5 bg-[#12161F] border border-metallic rounded-md">
+              <span className="text-[10px] text-[#64748B] font-mono tabular-nums px-2 py-0.5 bg-[#FFFFFF] border border-[#DCE4EE] rounded-md shadow-subtle">
                 Cantidad Bs × Tasa = Pesos
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 items-center">
-              <span className="text-[#C4CBD4] text-xs font-medium sm:col-span-2">
+              <span className="text-[#475569] text-xs font-medium sm:col-span-2">
                 Tasa multiplicadora:
               </span>
               <div className="sm:col-span-3">
-                <div className="flex items-center bg-[#1E2430] border border-metallic rounded-lg px-3 py-1.5 focus-within:border-[#00D4FF] transition-colors">
+                <div className="flex items-center bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg px-3 py-1.5 min-h-[44px] focus-within:border-[#0EA5E9] shadow-subtle transition-colors">
                   <input
                     type="number"
                     step="any"
                     min="0.0001"
                     value={rateBsToCop}
                     onChange={(e) => setRateBsToCop(Number(e.target.value))}
-                    className="w-full bg-transparent text-white font-bold text-sm focus:outline-none"
+                    className="w-full bg-transparent text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none"
                     required
                   />
-                  <span className="text-xs text-[#6E7785] font-mono ml-2 flex-shrink-0">COP/BS</span>
+                  <span className="text-xs text-[#64748B] font-mono tabular-nums ml-2 flex-shrink-0">COP/BS</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-[11px] text-[#C4CBD4] bg-[#12161F] p-2.5 rounded-lg border border-metallic flex items-center justify-between">
+            <div className="text-[11px] text-[#475569] bg-[#FFFFFF] p-2.5 rounded-lg border border-[#DCE4EE] shadow-subtle flex items-center justify-between gap-2 flex-wrap">
               <span className="font-medium">Ejemplo en vivo ({demoBs} Bs):</span>
-              <span className="text-[#00D4FF] font-bold font-mono">
+              <span className="text-[#0369A1] font-bold font-mono tabular-nums">
                 {demoBs} Bs × {rateBsToCop} = {demoCopFromBs.toLocaleString()} Pesos
               </span>
             </div>
           </div>
 
           {/* FÓRMULA 2: Bolívares a Dólares */}
-          <div className="p-3.5 bg-[#05070A] border border-metallic rounded-lg space-y-2.5">
-            <div className="flex items-center justify-between pb-0.5">
+          <div className="p-3.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg space-y-2.5">
+            <div className="flex items-center justify-between pb-0.5 gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#1EE868]" />
-                <span className="font-bold text-[#1EE868] uppercase tracking-wider text-xs">
+                <span className="w-2 h-2 rounded-full bg-[#059669]" />
+                <span className="font-bold text-[#059669] uppercase tracking-wider text-xs">
                   2. Bolívares a Dólares (USD)
                 </span>
               </div>
-              <span className="text-[10px] text-[#6E7785] font-mono px-2 py-0.5 bg-[#12161F] border border-metallic rounded-md">
+              <span className="text-[10px] text-[#64748B] font-mono tabular-nums px-2 py-0.5 bg-[#FFFFFF] border border-[#DCE4EE] rounded-md shadow-subtle">
                 Cantidad Bs ÷ Tasa = Dólares
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 items-center">
-              <span className="text-[#C4CBD4] text-xs font-medium sm:col-span-2">
+              <span className="text-[#475569] text-xs font-medium sm:col-span-2">
                 Tasa divisora (Bs por USD):
               </span>
               <div className="sm:col-span-3">
-                <div className="flex items-center bg-[#1E2430] border border-metallic rounded-lg px-3 py-1.5 focus-within:border-[#1EE868] transition-colors">
+                <div className="flex items-center bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg px-3 py-1.5 min-h-[44px] focus-within:border-[#059669] shadow-subtle transition-colors">
                   <input
                     type="number"
                     step="any"
                     min="0.01"
                     value={rateBsToUsd}
                     onChange={(e) => setRateBsToUsd(Number(e.target.value))}
-                    className="w-full bg-transparent text-white font-bold text-sm focus:outline-none"
+                    className="w-full bg-transparent text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none"
                     required
                   />
-                  <span className="text-xs text-[#6E7785] font-mono ml-2 flex-shrink-0">BS/USD</span>
+                  <span className="text-xs text-[#64748B] font-mono tabular-nums ml-2 flex-shrink-0">BS/USD</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-[11px] text-[#C4CBD4] bg-[#12161F] p-2.5 rounded-lg border border-metallic flex items-center justify-between">
+            <div className="text-[11px] text-[#475569] bg-[#FFFFFF] p-2.5 rounded-lg border border-[#DCE4EE] shadow-subtle flex items-center justify-between gap-2 flex-wrap">
               <span className="font-medium">Ejemplo en vivo ({demoBs} Bs):</span>
-              <span className="text-[#1EE868] font-bold font-mono">
+              <span className="text-[#059669] font-bold font-mono tabular-nums">
                 {demoBs} Bs ÷ {rateBsToUsd} = ${demoUsdFromBs} USD
               </span>
             </div>
           </div>
 
           {/* FÓRMULA 3: Pesos a Dólares */}
-          <div className="p-3.5 bg-[#05070A] border border-metallic rounded-lg space-y-2.5">
-            <div className="flex items-center justify-between pb-0.5">
+          <div className="p-3.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg space-y-2.5">
+            <div className="flex items-center justify-between pb-0.5 gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-white" />
-                <span className="font-bold text-white uppercase tracking-wider text-xs">
+                <span className="w-2 h-2 rounded-full bg-[#0B1526]" />
+                <span className="font-bold text-[#0B1526] uppercase tracking-wider text-xs">
                   3. Pesos a Dólares (USD)
                 </span>
               </div>
-              <span className="text-[10px] text-[#6E7785] font-mono px-2 py-0.5 bg-[#12161F] border border-metallic rounded-md">
+              <span className="text-[10px] text-[#64748B] font-mono tabular-nums px-2 py-0.5 bg-[#FFFFFF] border border-[#DCE4EE] rounded-md shadow-subtle">
                 Cantidad Pesos ÷ Tasa = Dólares
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 items-center">
-              <span className="text-[#C4CBD4] text-xs font-medium sm:col-span-2">
+              <span className="text-[#475569] text-xs font-medium sm:col-span-2">
                 Tasa divisora (COP por USD):
               </span>
               <div className="sm:col-span-3">
-                <div className="flex items-center bg-[#1E2430] border border-metallic rounded-lg px-3 py-1.5 focus-within:border-white transition-colors">
+                <div className="flex items-center bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg px-3 py-1.5 min-h-[44px] focus-within:border-[#0B1526] shadow-subtle transition-colors">
                   <input
                     type="number"
                     step="any"
                     min="0.01"
                     value={rateCopToUsd}
                     onChange={(e) => setRateCopToUsd(Number(e.target.value))}
-                    className="w-full bg-transparent text-white font-bold text-sm focus:outline-none"
+                    className="w-full bg-transparent text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none"
                     required
                   />
-                  <span className="text-xs text-[#6E7785] font-mono ml-2 flex-shrink-0">COP/USD</span>
+                  <span className="text-xs text-[#64748B] font-mono tabular-nums ml-2 flex-shrink-0">COP/USD</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-[11px] text-[#C4CBD4] bg-[#12161F] p-2.5 rounded-lg border border-metallic flex items-center justify-between">
+            <div className="text-[11px] text-[#475569] bg-[#FFFFFF] p-2.5 rounded-lg border border-[#DCE4EE] shadow-subtle flex items-center justify-between gap-2 flex-wrap">
               <span className="font-medium">Ejemplo en vivo ({demoCop.toLocaleString()} COP):</span>
-              <span className="text-white font-bold font-mono">
+              <span className="text-[#0B1526] font-bold font-mono tabular-nums">
                 {demoCop.toLocaleString()} COP ÷ {rateCopToUsd} = ${demoUsdFromCop} USD
               </span>
             </div>
           </div>
 
-          {/* Botones Cero Degradados Encapsulados */}
-          <div className="p-2 bg-[#05070A] border border-metallic rounded-lg flex items-center justify-end gap-2.5">
+          {/* Botones Encapsulados */}
+          <div className="p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-[#1E2430] hover:bg-[#1E2430]/70 text-[#C4CBD4] hover:text-white rounded-lg text-xs font-bold transition-colors"
+              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] rounded-lg text-xs font-semibold border border-[#CBD5E1] shadow-subtle transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-5 py-2 bg-[#1EE868] hover:bg-[#1EE868]/90 text-[#05070A] font-black text-xs uppercase tracking-wider rounded-lg transition-colors"
+              className="min-h-[44px] flex items-center justify-center gap-2 px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors"
             >
               {savedSuccess ? (
                 <>

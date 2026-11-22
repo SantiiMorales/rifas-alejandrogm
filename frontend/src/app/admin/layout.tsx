@@ -31,7 +31,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleRaffleCreated = (newRaffle: Raffle) => {
     setActiveRaffle(newRaffle);
-    window.location.reload();
   };
 
   const handleRatesUpdated = (updated: ExchangeRate) => {
@@ -39,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-[#05070A] text-white flex flex-col md:flex-row">
+    <div className="min-h-dvh bg-[#F4F7FA] text-[#0B1526] flex flex-col md:flex-row">
       {/* Paneles a la Izquierda en un Desplegable en forma de Lista */}
       <Sidebar
         rates={rates}
@@ -47,8 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onOpenRates={() => setIsRatesOpen(true)}
       />
 
-      {/* Contenido Principal */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      {/* Contenido Principal con espaciado móvil para evitar solapamiento con botón flotante */}
+      <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-16 md:pt-6">
         {children}
       </main>
 

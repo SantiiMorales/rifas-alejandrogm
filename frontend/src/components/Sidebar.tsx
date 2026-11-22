@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Ticket,
@@ -32,8 +32,18 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [panelsDropdownOpen, setPanelsDropdownOpen] = useState(true);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   const handleLogout = () => {
     logoutAdmin();
@@ -52,17 +62,18 @@ export default function Sidebar({
       {/* Botón flotante para abrir/cerrar menú en móviles */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-3 left-3 z-50 p-2 bg-[#12161F] border border-metallic rounded-lg text-white"
-        aria-label="Abrir Menú"
+        className="md:hidden fixed top-3 left-3 z-50 min-h-[44px] min-w-[44px] flex items-center justify-center bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg text-[#0B1526] shadow-subtle hover:bg-[#EAF0F6] active:bg-[#DCE4EE] transition-colors"
+        aria-label={isOpen ? 'Cerrar Menú' : 'Abrir Menú'}
       >
-        {isOpen ? <X className="w-5 h-5 text-[#1EE868]" /> : <Menu className="w-5 h-5" />}
+        {isOpen ? <X className="w-5 h-5 text-[#0369A1]" /> : <Menu className="w-5 h-5 text-[#0B1526]" />}
       </button>
 
-      {/* Backdrop oscuro para móviles */}
+      {/* Backdrop para móviles con cierre al clic */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="md:hidden fixed inset-0 bg-black/70 z-30 transition-opacity"
+          className="md:hidden fixed inset-0 bg-[#0B1526]/40 backdrop-blur-sm z-30 transition-opacity"
+          aria-hidden="true"
         />
       )}
 
@@ -70,25 +81,25 @@ export default function Sidebar({
       <aside
         className={`${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } fixed md:sticky top-0 left-0 h-screen w-72 bg-[#12161F] border-r border-metallic z-40 transition-transform duration-200 flex flex-col justify-between p-4 flex-shrink-0 select-none overflow-y-auto`}
+        } fixed md:sticky top-0 left-0 h-dvh w-72 max-w-[85vw] bg-[#FFFFFF] border-r border-[#DCE4EE] z-40 transition-transform duration-200 flex flex-col justify-between p-4 flex-shrink-0 select-none overflow-y-auto shadow-subtle`}
       >
         <div className="space-y-5">
-          {/* Cabecera / Marca Alejandro GM Encapsulada (Cero Degradados) */}
-          <div className="p-3 bg-[#05070A] border border-metallic rounded-lg flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#12161F] border border-[#1EE868] flex items-center justify-center flex-shrink-0">
-              <span className="font-brand-condensed text-xl font-black text-[#1EE868]">GM</span>
+          {/* Cabecera / Marca Alejandro GM Encapsulada */}
+          <div className="p-3 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#0B1526] border border-[#CBD5E1] shadow-subtle flex items-center justify-center flex-shrink-0">
+              <span className="font-display text-xl font-extrabold text-[#0EA5E9]">GM</span>
             </div>
-            <div>
-              <div className="flex items-baseline gap-1 leading-none">
-                <span className="font-brand-slab text-base font-black text-white">RIFAS</span>
-                <span className="font-brand-condensed text-lg font-black text-[#1EE868]">
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-1 leading-none truncate">
+                <span className="font-display text-base font-bold text-[#0B1526] tracking-tight">RIFAS</span>
+                <span className="font-display text-lg font-black text-[#0369A1] tracking-tight">
                   ALEJANDRO GM
                 </span>
               </div>
               <div className="flex items-center gap-1.5 mt-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#00D4FF]" />
-                <span className="text-[9px] uppercase tracking-wider text-[#C4CBD4] font-semibold">
-                  Modo Oscuro Sólido
+                <ShieldCheck className="w-3.5 h-3.5 text-[#059669] flex-shrink-0" />
+                <span className="text-[9px] uppercase tracking-wider text-[#64748B] font-semibold truncate">
+                  Sistema Oficial
                 </span>
               </div>
             </div>
@@ -97,22 +108,28 @@ export default function Sidebar({
           {/* Acciones Rápidas */}
           <div className="space-y-2">
             <button
-              onClick={onOpenCreateRaffle}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-[#1EE868] hover:bg-[#1EE868]/90 text-[#05070A] font-black text-xs uppercase tracking-wider rounded-lg transition-colors"
+              onClick={() => {
+                onOpenCreateRaffle();
+                if (window.innerWidth < 768) setIsOpen(false);
+              }}
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#0369A1] hover:bg-[#075985] text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors"
             >
-              <PlusCircle className="w-4 h-4" />
+              <PlusCircle className="w-4 h-4 flex-shrink-0" />
               <span>Crear Nueva Rifa</span>
             </button>
 
             <button
-              onClick={onOpenRates}
-              className="w-full flex items-center justify-between px-3 py-2 bg-[#1E2430] hover:bg-[#1E2430]/80 text-[#C4CBD4] hover:text-white border border-metallic rounded-lg text-xs font-semibold transition-colors"
+              onClick={() => {
+                onOpenRates();
+                if (window.innerWidth < 768) setIsOpen(false);
+              }}
+              className="w-full min-h-[44px] flex items-center justify-between px-3 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-semibold shadow-subtle transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-[#00D4FF]" />
+                <Sliders className="w-4 h-4 text-[#0369A1] flex-shrink-0" />
                 <span>Configurar Tasas</span>
               </div>
-              <span className="text-[10px] text-[#00D4FF] font-bold">Editar</span>
+              <span className="text-[10px] text-[#0369A1] font-bold">Editar</span>
             </button>
           </div>
 
@@ -120,7 +137,7 @@ export default function Sidebar({
           <div className="space-y-1">
             <button
               onClick={() => setPanelsDropdownOpen(!panelsDropdownOpen)}
-              className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-bold text-[#6E7785] uppercase tracking-wider hover:text-white transition-colors"
+              className="w-full min-h-[36px] flex items-center justify-between px-2 py-1.5 text-xs font-bold text-[#64748B] uppercase tracking-wider hover:text-[#0B1526] transition-colors"
             >
               <span>Paneles del Sistema</span>
               {panelsDropdownOpen ? (
@@ -142,18 +159,18 @@ export default function Sidebar({
                         router.push(item.href);
                         if (window.innerWidth < 768) setIsOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors text-left ${
+                      className={`w-full min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors text-left ${
                         isActive
-                          ? 'bg-[#1E2430] text-[#1EE868] border-l-4 border-[#1EE868]'
-                          : 'text-[#C4CBD4] hover:text-white hover:bg-[#1E2430]/60'
+                          ? 'bg-[#E0F2FE] text-[#0369A1] border-l-4 border-[#0369A1]'
+                          : 'text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6]'
                       }`}
                     >
                       <Icon
-                        className={`w-4 h-4 ${
-                          isActive ? 'text-[#1EE868]' : 'text-[#6E7785]'
+                        className={`w-4 h-4 flex-shrink-0 ${
+                          isActive ? 'text-[#0369A1]' : 'text-[#64748B]'
                         }`}
                       />
-                      <span>{item.label}</span>
+                      <span className="truncate">{item.label}</span>
                     </button>
                   );
                 })}
@@ -161,27 +178,27 @@ export default function Sidebar({
             )}
           </div>
 
-          {/* Resumen de Tasas Vigentes (Exactas según solicitud) */}
-          <div className="p-3 bg-[#05070A] border border-metallic rounded-lg space-y-2 text-[11px]">
-            <span className="text-[10px] font-bold text-[#6E7785] uppercase tracking-wider block">
+          {/* Resumen de Tasas Vigentes */}
+          <div className="p-3 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg space-y-2 text-[11px]">
+            <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
               Tasas de Conversión Activas:
             </span>
-            <div className="space-y-1 text-[#C4CBD4]">
-              <div className="flex justify-between">
-                <span>Bs a Pesos:</span>
-                <span className="text-[#00D4FF] font-bold font-mono">
+            <div className="space-y-1.5 text-[#475569]">
+              <div className="flex justify-between items-center gap-2">
+                <span className="truncate">Bs a Pesos:</span>
+                <span className="text-[#0369A1] font-semibold font-mono tabular-nums whitespace-nowrap">
                   Bs * {rates.rate_bs_to_cop}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Bs a Dólares:</span>
-                <span className="text-[#1EE868] font-bold font-mono">
+              <div className="flex justify-between items-center gap-2">
+                <span className="truncate">Bs a Dólares:</span>
+                <span className="text-[#059669] font-semibold font-mono tabular-nums whitespace-nowrap">
                   Bs / {rates.rate_bs_to_usd}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Pesos a Dólares:</span>
-                <span className="text-white font-bold font-mono">
+              <div className="flex justify-between items-center gap-2">
+                <span className="truncate">Pesos a Dólares:</span>
+                <span className="text-[#0B1526] font-semibold font-mono tabular-nums whitespace-nowrap">
                   COP / {rates.rate_cop_to_usd}
                 </span>
               </div>
@@ -190,12 +207,12 @@ export default function Sidebar({
         </div>
 
         {/* Pie de Barra Lateral Encapsulado */}
-        <div className="p-1.5 bg-[#05070A] border border-metallic rounded-lg">
+        <div className="p-1.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg mt-4">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 rounded-lg transition-colors"
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 flex-shrink-0" />
             <span>Cerrar Sesión</span>
           </button>
         </div>

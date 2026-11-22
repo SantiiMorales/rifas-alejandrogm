@@ -8,10 +8,30 @@ from .routers import auth, finances, public, raffles, tickets
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Inicialización de tablas y datos semilla en memoria
+    # Inicialización de tablas y datos semilla
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
+        # Migración segura en SQLite si la BD ya existía sin las nuevas columnas
+        from sqlalchemy import text
+        try:
+            res = db.execute(text("PRAGMA table_info(raffles)")).fetchall()
+            cols = [r[1] for r in res]
+            if "scheme" not in cols:
+                db.execute(text("ALTER TABLE raffles ADD COLUMN scheme VARCHAR(50) DEFAULT 'standard_100'"))
+                db.commit()
+        except Exception as e:
+            print("[Migration] Notice on raffles:", e)
+
+        try:
+            res = db.execute(text("PRAGMA table_info(tickets)")).fetchall()
+            cols = [r[1] for r in res]
+            if "numbers_json" not in cols:
+                db.execute(text("ALTER TABLE tickets ADD COLUMN numbers_json TEXT"))
+                db.commit()
+        except Exception as e:
+            print("[Migration] Notice on tickets:", e)
+
         seed_initial_data(db)
     finally:
         db.close()
@@ -47,7 +67,7 @@ def root():
     return {
         "app": "Rifas Alejandro GM API",
         "status": "online",
-        "mode": "in-memory",
+        "mode": "sqlite-persistent",
         "docs": "/docs",
     }
 

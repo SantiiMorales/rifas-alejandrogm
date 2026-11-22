@@ -13,22 +13,30 @@ router = APIRouter(prefix="/api/public", tags=["public"])
 @router.get("/ticket", response_model=List[TicketResponse])
 def public_query_ticket(
     query: str = Query(..., min_length=1, description="Número de ticket o número de celular"),
+    raffle_id: Optional[int] = Query(None, description="ID opcional de la rifa a consultar"),
     db: Session = Depends(get_db),
 ):
     term = query.strip()
     clean_phone = term.replace(" ", "").replace("-", "").replace("+", "")
 
-    # Buscar en la rifa activa
-    raffle = (
-        db.query(Raffle)
-        .filter(Raffle.status == "active")
-        .order_by(Raffle.id.desc())
-        .first()
-    )
+    # Si viene raffle_id se busca en esa rifa específica; si no, en la activa o más reciente
+    raffle = None
+    if raffle_id:
+        raffle = db.query(Raffle).filter(Raffle.id == raffle_id).first()
+    if not raffle:
+        raffle = (
+            db.query(Raffle)
+            .filter(Raffle.status == "active")
+            .order_by(Raffle.id.desc())
+            .first()
+        )
+    if not raffle:
+        raffle = db.query(Raffle).order_by(Raffle.id.desc()).first()
+
     if not raffle:
         raise HTTPException(status_code=404, detail="No hay una rifa activa actualmente")
 
-    # Intentar coincidencia exacta o formateada con número de boleto o teléfono
+    # Intentar coincidencia exacta o formateada con número de boleto, números asignados o teléfono
     tickets = (
         db.query(Ticket)
         .filter(
@@ -36,6 +44,8 @@ def public_query_ticket(
             or_(
                 Ticket.ticket_number == term,
                 Ticket.ticket_number == term.zfill(len(str(raffle.total_numbers - 1))),
+                Ticket.numbers_json.ilike(f'%"{term}"%'),
+                Ticket.numbers_json.ilike(f"%{term}%"),
                 Ticket.customer_phone.ilike(f"%{clean_phone}%"),
                 Ticket.customer_phone.ilike(f"%{term}%"),
             ),
