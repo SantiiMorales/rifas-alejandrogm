@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import CreateRaffleModal from '@/components/CreateRaffleModal';
 import ExchangeRatesModal from '@/components/ExchangeRatesModal';
@@ -19,6 +20,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/admin/login' || pathname?.startsWith('/admin/login');
+
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [rates, setRates] = useState<ExchangeRate>(DEFAULT_EXCHANGE_RATES);
@@ -27,10 +31,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isRatesOpen, setIsRatesOpen] = useState(false);
 
   useEffect(() => {
+    if (isLoginPage) {
+      setAuthChecked(true);
+      return;
+    }
+
     const validateAuth = async () => {
       const token = getAdminToken();
       if (!token) {
-        router.replace('/login');
+        router.replace('/admin/login');
         return;
       }
 
@@ -52,21 +61,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           });
         } else {
           logoutAdmin();
-          router.replace('/login');
+          router.replace('/admin/login');
         }
       } catch {
-        // Red caída: si hay token válido en localStorage lo mantenemos; sin token → login
+        // Red caída: si hay token en localStorage lo mantenemos; sin token → login
         if (token) {
           setIsAuthenticated(true);
           setAuthChecked(true);
         } else {
-          router.replace('/login');
+          router.replace('/admin/login');
         }
       }
     };
 
     validateAuth();
-  }, [router]);
+  }, [router, isLoginPage]);
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   const handleRaffleCreated = (newRaffle: Raffle) => {
     setActiveRaffle(newRaffle);
@@ -95,7 +108,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onOpenRates={() => setIsRatesOpen(true)}
       />
 
-      <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-16 md:pt-6">
+      <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-16 md:pt-6 space-y-4">
+        {/* Header discreto del panel con botón de Cerrar Sesión */}
+        <div className="flex items-center justify-between pb-3 border-b border-[#DCE4EE]">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+            <span className="text-xs font-semibold text-[#475569]">Administrador conectado</span>
+          </div>
+          <button
+            onClick={() => {
+              logoutAdmin();
+              router.replace('/admin/login');
+            }}
+            className="min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFFFF] hover:bg-red-50 text-[#64748B] hover:text-red-600 border border-[#DCE4EE] hover:border-red-200 rounded-lg text-xs font-semibold shadow-subtle transition-colors"
+            title="Cerrar Sesión"
+          >
+            <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+
         {children}
       </main>
 

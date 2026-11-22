@@ -25,7 +25,8 @@ function getAuthHeaders(): HeadersInit {
 function handleUnauthorized(res: Response): void {
   if (res.status === 401 && typeof window !== 'undefined') {
     localStorage.removeItem(TOKEN_KEY);
-    window.location.href = '/login?expired=1';
+    localStorage.removeItem('user');
+    window.location.href = '/admin/login?expired=1';
   }
 }
 
@@ -472,6 +473,15 @@ export async function createRaffle(payload: {
   saveLocalTickets(serverRaffle.id, serverTickets);
 
   if (typeof window !== 'undefined') {
+    // Limpiar caché vieja de boletos de rifas anteriores
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('raffle_tickets_') || key === 'active_raffle')) {
+        if (key !== `raffle_tickets_${serverRaffle.id}`) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
     localStorage.setItem('active_raffle_id', String(serverRaffle.id));
     const url = new URL(window.location.href);
     url.searchParams.set('raffle', String(serverRaffle.id));
@@ -576,6 +586,7 @@ export async function reserveTicket(
       }
       return updatedTicket;
     }
+    handleUnauthorized(res);
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Error al apartar el boleto');
   } catch (err: any) {
@@ -583,7 +594,11 @@ export async function reserveTicket(
       err.message &&
       (err.message.includes('disponible') ||
         err.message.includes('existe') ||
-        err.message.includes('obligatorios'))
+        err.message.includes('obligatorios') ||
+        err.message.includes('Token') ||
+        err.message.includes('expirado') ||
+        err.message.includes('Unauthorized') ||
+        err.message.includes('401'))
     ) {
       throw err;
     }

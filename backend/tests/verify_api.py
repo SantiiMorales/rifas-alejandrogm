@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath("."))
 import httpx
 from backend.app.main import app
 from backend.app.database import Base, engine, SessionLocal
+from backend.app.models import Raffle
 from backend.app.seed import seed_initial_data
 
 
@@ -92,6 +93,11 @@ async def main():
         r = await client.get("/api/raffles", headers=headers)
         all_raffles = r.json()
         assert len(all_raffles) == 1, f"Se esperaba 1 rifa, se encontraron {len(all_raffles)}"
+        check_db = SessionLocal()
+        try:
+            assert check_db.query(Raffle).count() == 1, f"db.query(Raffle).count() esperado 1, se obtuvo {check_db.query(Raffle).count()}"
+        finally:
+            check_db.close()
         print(f"✓ BD limpia: solo 1 rifa activa (eliminó la anterior ID={raffle_id_before})")
 
         # 9. Verificar boletos creados (333 para triples_333)
