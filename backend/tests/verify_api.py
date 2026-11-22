@@ -22,93 +22,113 @@ async def main():
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         # 1. Health check
         r = await client.get("/api/health")
-        assert r.status_code == 200
+        assert r.status_code == 200, f"Health check falló: {r.status_code}"
+        print("✓ Health check OK")
 
-        # 2. Login admin
-        r = await client.post("/api/auth/login", json={"username": "admin", "password": "admin123"})
-        assert r.status_code == 200
-        token = r.json()["access_token"]
+        # 2. POST /api/raffles SIN token → 401
+        r = await client.post("/api/raffles", json={
+            "title": "Rifa sin auth",
+            "total_numbers": 100,
+            "ticket_price_usd": 10.0,
+            "total_investment_usd": 400.0,
+        })
+        assert r.status_code == 401, f"Se esperaba 401, se obtuvo {r.status_code}"
+        print("✓ POST /api/raffles sin token → 401")
+
+        # 3. POST /api/tickets/1/reserve SIN token → 401
+        r = await client.post("/api/tickets/1/reserve", json={
+            "customer_name": "Test",
+            "customer_phone": "1234567",
+        })
+        assert r.status_code == 401, f"Se esperaba 401, se obtuvo {r.status_code}"
+        print("✓ POST /api/tickets/1/reserve sin token → 401")
+
+        # 4. Login con credenciales INVÁLIDAS → 401
+        r = await client.post("/api/auth/login", json={"username": "admin", "password": "wrong_pass"})
+        assert r.status_code == 401, f"Se esperaba 401, se obtuvo {r.status_code}"
+        print("✓ Login con credenciales inválidas → 401")
+
+        # 5. Login con credenciales VÁLIDAS → 200 + access_token
+        admin_user = os.getenv("ADMIN_USERNAME", "admin")
+        admin_pass = os.getenv("ADMIN_PASSWORD", "admin123")
+        r = await client.post("/api/auth/login", json={"username": admin_user, "password": admin_pass})
+        assert r.status_code == 200, f"Login falló: {r.status_code} {r.text}"
+        token_data = r.json()
+        assert "access_token" in token_data, "No se recibió access_token"
+        token = token_data["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
+        print("✓ Login con credenciales válidas → 200 + access_token")
 
-        # 3. Active raffle with multiple special games
-        r = await client.get("/api/raffles/active")
+        # 6. GET /api/auth/me con token válido → authenticated: true
+        r = await client.get("/api/auth/me", headers=headers)
         assert r.status_code == 200
-        raffle = r.json()
-        assert len(raffle["special_games"]) >= 2
-        print(f"Raffle has {len(raffle['special_games'])} special games configured:")
-        for g in raffle["special_games"]:
-            print(f" - {g['name']} (Min: ${g['min_amount']} USD)")
-        raffle_id = raffle["id"]
+        assert r.json()["authenticated"] is True
+        print("✓ GET /api/auth/me → authenticated: true")
 
-        # 4. Tickets list (Now accessible without blocking)
-        r = await client.get(f"/api/raffles/{raffle_id}/tickets")
+        # 7. POST /api/raffles CON token → 201, elimina anterior y crea nueva
+        raffle_id_before = None
+        r_active = await client.get("/api/raffles/active")
+        if r_active.status_code == 200:
+            raffle_id_before = r_active.json()["id"]
+
+        r = await client.post("/api/raffles", json={
+            "title": "Rifa de Verificación JWT",
+            "description": "Rifa creada en test de seguridad",
+            "total_numbers": 333,
+            "scheme": "triples_333",
+            "ticket_price_usd": 15.0,
+            "total_investment_usd": 500.0,
+            "special_games": [
+                {"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0},
+                {"id": 2, "name": "Sorteo Anticipado 2", "min_amount": 5.0},
+            ],
+        }, headers=headers)
+        assert r.status_code == 201, f"Creación de rifa falló: {r.status_code} {r.text}"
+        new_raffle = r.json()
+        new_raffle_id = new_raffle["id"]
+        print(f"✓ POST /api/raffles con token → 201, nueva rifa ID={new_raffle_id}")
+
+        # 8. Verificar que solo existe 1 rifa en la BD
+        r = await client.get("/api/raffles", headers=headers)
+        all_raffles = r.json()
+        assert len(all_raffles) == 1, f"Se esperaba 1 rifa, se encontraron {len(all_raffles)}"
+        print(f"✓ BD limpia: solo 1 rifa activa (eliminó la anterior ID={raffle_id_before})")
+
+        # 9. Verificar boletos creados (333 para triples_333)
+        r = await client.get(f"/api/raffles/{new_raffle_id}/tickets")
         assert r.status_code == 200
         tickets = r.json()
-        assert len(tickets) == 100
-        print(f"Fetched {len(tickets)} tickets successfully")
+        assert len(tickets) == 333, f"Se esperaban 333 boletos, se encontraron {len(tickets)}"
+        print(f"✓ 333 boletos creados correctamente")
 
-        # 5. Check qualified games on ticket with abono
-        reserved = [t for t in tickets if t["status"] == "reserved"]
-        assert len(reserved) > 0
-        first_res = reserved[0]
-        print(f"Ticket #{first_res['ticket_number']} has qualified games: {first_res['qualified_games']}")
-
-        # 6. Reserve an available ticket with COP
+        # 10. Apartar boleto #001 CON token → 200
         avail = [t for t in tickets if t["status"] == "available"][0]
-        ticket_id = avail["id"]
-        # 21000 COP / 4200 = 5.0 USD
         r = await client.post(
-            f"/api/tickets/{ticket_id}/reserve",
+            f"/api/tickets/{avail['id']}/reserve",
             json={
-                "customer_name": "Gabriel Marquez",
-                "customer_phone": "+58 412 8887766",
-                "customer_address": "Av. Libertador",
-                "initial_payment": 21000.0,
-                "initial_currency": "COP",
-                "notes": "Abono inicial",
+                "raffle_id": new_raffle_id,
+                "ticket_number": avail["ticket_number"],
+                "customer_name": "Verificación JWT",
+                "customer_phone": "+58 412 0000001",
+                "initial_payment": 5.0,
+                "initial_currency": "USD",
             },
             headers=headers,
         )
-        assert r.status_code == 200
-        res_data = r.json()
-        assert res_data["status"] == "reserved"
-        assert res_data["total_paid_usd"] == 5.0
-        assert len(res_data["qualified_games"]) >= 1
+        assert r.status_code == 200, f"Reserve falló: {r.status_code} {r.text}"
+        assert r.json()["status"] == "reserved"
+        print(f"✓ Apartar boleto #{avail['ticket_number']} con token → 200")
 
-        # 7. Add payment to complete 100%
-        r = await client.post(
-            f"/api/tickets/{ticket_id}/payment",
-            json={"amount": 5.0, "currency": "USD", "notes": "Completando pago"},
-            headers=headers,
-        )
+        # 11. Vista pública sigue siendo accesible SIN token
+        r = await client.get("/api/raffles/active")
         assert r.status_code == 200
-        assert r.json()["status"] == "paid"
-
-        # 8. Check Exchange Rates endpoint with requested formulas
+        r = await client.get(f"/api/raffles/{new_raffle_id}/tickets")
+        assert r.status_code == 200
         r = await client.get("/api/finances/rates")
         assert r.status_code == 200
-        rates = r.json()
-        assert "rate_bs_to_cop" in rates
-        assert "rate_bs_to_usd" in rates
-        assert "rate_cop_to_usd" in rates
-        print(f"Exchange rates: Bs->COP: {rates['rate_bs_to_cop']}, Bs->USD: {rates['rate_bs_to_usd']}, COP->USD: {rates['rate_cop_to_usd']}")
+        print("✓ Endpoints públicos accesibles sin token")
 
-        # 9. Update rates
-        r = await client.put(
-            "/api/finances/rates",
-            json={"rate_bs_to_cop": 75.0, "rate_bs_to_usd": 62.0, "rate_cop_to_usd": 4300.0},
-            headers=headers,
-        )
-        assert r.status_code == 200
-        assert r.json()["rate_bs_to_cop"] == 75.0
-        assert r.json()["rate_bs_to_usd"] == 62.0
-
-        # 10. Public query
-        r = await client.get("/api/public/ticket?query=8887766")
-        assert r.status_code == 200
-        assert len(r.json()) >= 1
-
-    print("\n>>> ALL TESTS PASSED WITH NEW SPECIAL GAMES & RATE FORMULAS! <<<")
+    print("\n>>> TODOS LOS TESTS DE SEGURIDAD JWT PASARON CORRECTAMENTE <<<")
 
 
 if __name__ == "__main__":

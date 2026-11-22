@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Sparkles, Plus, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Sparkles, Plus, Trash2, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { createRaffle } from '@/lib/api';
 import { Raffle, SpecialGameItem } from '@/lib/types';
 import { TicketSchemeType } from '@/lib/ticketSchemes';
@@ -12,6 +12,7 @@ interface CreateRaffleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRaffleCreated: (newRaffle: Raffle) => void;
+  currentRaffle?: Raffle | null;
 }
 
 const SCHEME_OPTIONS: CustomSelectOption[] = [
@@ -36,6 +37,7 @@ export default function CreateRaffleModal({
   isOpen,
   onClose,
   onRaffleCreated,
+  currentRaffle,
 }: CreateRaffleModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -54,6 +56,10 @@ export default function CreateRaffleModal({
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [showDestructiveModal, setShowDestructiveModal] = useState(false);
+  const [destructiveConfirmed, setDestructiveConfirmed] = useState(false);
+  // Payload pendiente de envío tras confirmar el modal destructivo
+  const pendingPayloadRef = React.useRef<Parameters<typeof createRaffle>[0] | null>(null);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const modalScrollRef = useRef<HTMLDivElement>(null);
@@ -163,19 +169,34 @@ export default function CreateRaffleModal({
       }
     }
 
+    const payload = {
+      title: title.trim(),
+      description: description.trim(),
+      total_numbers: Number(totalNumbers),
+      scheme,
+      ticket_price_usd: numericPrice,
+      total_investment_usd: numericInvestment,
+      special_games: specialGames,
+    };
+
+    // Si ya hay una rifa activa con ID real (distinto del default), pedir confirmación destructiva
+    const hasActiveRaffle = currentRaffle && currentRaffle.id > 0;
+    if (hasActiveRaffle && !showDestructiveModal) {
+      pendingPayloadRef.current = payload;
+      setDestructiveConfirmed(false);
+      setShowDestructiveModal(true);
+      return;
+    }
+
+    await doCreateRaffle(payload);
+  };
+
+  const doCreateRaffle = async (payload: Parameters<typeof createRaffle>[0]) => {
     setIsCreating(true);
+    setShowDestructiveModal(false);
 
     try {
-      const created = await createRaffle({
-        title: title.trim(),
-        description: description.trim(),
-        total_numbers: Number(totalNumbers),
-        scheme,
-        ticket_price_usd: numericPrice,
-        total_investment_usd: numericInvestment,
-        special_games: specialGames,
-      });
-
+      const created = await createRaffle(payload);
       setSuccessMsg('¡Rifa oficial creada con éxito!');
       onRaffleCreated(created);
       resetForm();
@@ -188,6 +209,76 @@ export default function CreateRaffleModal({
       setIsCreating(false);
     }
   };
+
+  // Modal de confirmación destructiva
+  if (showDestructiveModal) {
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/60 backdrop-blur-sm">
+        <div className="w-full max-w-md bg-[#FFFFFF] border border-red-200 rounded-lg shadow-modal animate-scale-in overflow-hidden">
+          {/* Cabecera de peligro */}
+          <div className="p-4 bg-[#FEF2F2] border-b border-red-200 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[#FEE2E2] flex-shrink-0">
+              <AlertTriangle className="w-6 h-6 text-[#DC2626]" />
+            </div>
+            <div>
+              <h2 className="text-sm font-display font-bold text-[#991B1B] uppercase tracking-wider">
+                ¿Reemplazar la rifa actual?
+              </h2>
+              <p className="text-[11px] text-[#B91C1C] mt-0.5">Esta acción no se puede deshacer</p>
+            </div>
+          </div>
+
+          {/* Cuerpo */}
+          <div className="p-4 sm:p-5 space-y-4">
+            <p className="text-xs text-[#374151] leading-relaxed">
+              Al crear esta nueva rifa, la rifa actual{' '}
+              <strong className="text-[#0B1526]">«{currentRaffle?.title}»</strong> junto con{' '}
+              <strong>TODOS sus boletos, clientes registrados, abonos e historial de ventas</strong>{' '}
+              serán <span className="text-[#DC2626] font-bold">eliminados permanentemente</span>.
+            </p>
+
+            <label className="flex items-start gap-3 cursor-pointer p-3 bg-[#FEF2F2] border border-red-200 rounded-lg">
+              <input
+                type="checkbox"
+                checked={destructiveConfirmed}
+                onChange={(e) => setDestructiveConfirmed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-[#DC2626] flex-shrink-0 cursor-pointer"
+              />
+              <span className="text-xs text-[#7F1D1D] font-semibold leading-relaxed">
+                Entiendo que la rifa actual y todos sus registros se borrarán definitivamente
+              </span>
+            </label>
+          </div>
+
+          {/* Pie de botones */}
+          <div className="p-3 bg-[#F9FAFB] border-t border-[#E5E7EB] flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setShowDestructiveModal(false)}
+              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              disabled={!destructiveConfirmed || isCreating}
+              onClick={() => pendingPayloadRef.current && doCreateRaffle(pendingPayloadRef.current)}
+              className="min-h-[44px] px-4 py-2 bg-[#DC2626] hover:bg-[#B91C1C] disabled:bg-[#FCA5A5] disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-subtle transition-all flex items-center gap-2"
+            >
+              {isCreating ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Creando...</span>
+                </>
+              ) : (
+                <span>Sí, borrar anterior y lanzar rifa</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm">

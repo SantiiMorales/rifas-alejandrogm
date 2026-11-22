@@ -1,16 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock, User, ArrowRight } from 'lucide-react';
 import { loginAdmin } from '@/lib/api';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('expired') === '1') {
+      setError('Tu sesión expiró, inicia sesión nuevamente.');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +28,7 @@ export default function LoginPage() {
       await loginAdmin(username.trim(), password);
       router.push('/admin');
     } catch (err: any) {
-      setError('Usuario o contraseña incorrectos. Verifica tus credenciales.');
+      setError(err?.message || 'Usuario o contraseña incorrectos. Verifica tus credenciales.');
     } finally {
       setLoading(false);
     }
@@ -94,5 +101,13 @@ export default function LoginPage() {
 
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-dvh bg-[#F4F7FA]" />}>
+      <LoginContent />
+    </React.Suspense>
   );
 }

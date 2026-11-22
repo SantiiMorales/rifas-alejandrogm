@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from ..auth import get_current_admin
 from ..database import get_db
 from ..models import ExchangeRate, Payment, Raffle, Ticket
 from ..schemas import (
@@ -243,6 +244,7 @@ def get_exchange_rates(db: Session = Depends(get_db)):
 def update_exchange_rates(
     payload: ExchangeRateUpdate,
     db: Session = Depends(get_db),
+    _: dict = Depends(get_current_admin),
 ):
     rates = db.query(ExchangeRate).first()
     if not rates:

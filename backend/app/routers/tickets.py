@@ -4,6 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from ..auth import get_current_admin
 from ..database import get_db
 from ..models import ExchangeRate, Payment, Raffle, Ticket
 from ..schemas import PaymentCreate, PaymentResponse, TicketReserve, TicketResponse
@@ -153,6 +154,7 @@ def reserve_ticket(
     ticket_id: int,
     payload: TicketReserve,
     db: Session = Depends(get_db),
+    _: dict = Depends(get_current_admin),
 ):
     ticket = None
 
@@ -246,6 +248,7 @@ def add_ticket_payment(
     ticket_id: int,
     payload: PaymentCreate,
     db: Session = Depends(get_db),
+    _: dict = Depends(get_current_admin),
 ):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
@@ -296,7 +299,7 @@ def add_ticket_payment(
 
 
 @router.post("/tickets/{ticket_id}/release", response_model=TicketResponse)
-def release_ticket(ticket_id: int, db: Session = Depends(get_db)):
+def release_ticket(ticket_id: int, db: Session = Depends(get_db), _: dict = Depends(get_current_admin)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")

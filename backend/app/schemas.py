@@ -224,4 +224,5 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     username: str
-    is_admin: bool
+    is_admin: bool = True
+    expires_in: Optional[int] = None

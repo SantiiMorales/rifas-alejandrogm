@@ -306,12 +306,10 @@ export default function ConsultarPage() {
             </div>
           </div>
 
-          <Link
-            href="/admin"
-            className="min-h-[44px] flex items-center gap-1.5 px-3 py-2 bg-[#EAF0F6] hover:bg-[#DCE4EE] text-[#0369A1] border border-[#CBD5E1] rounded-lg text-xs font-semibold transition-colors flex-shrink-0"
-          >
-            <span>Panel Admin</span>
-          </Link>
+          <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0">
+            <ShieldCheck className="w-4 h-4 text-[#059669]" />
+            <span className="text-[10px] font-semibold text-[#059669] uppercase tracking-wider hidden sm:block">Verificado</span>
+          </div>
         </div>
 
         <div className="text-center space-y-1">

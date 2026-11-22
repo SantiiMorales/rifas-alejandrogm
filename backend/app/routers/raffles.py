@@ -2,8 +2,9 @@ import json
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from ..auth import get_current_admin
 from ..database import get_db
-from ..models import Raffle, Ticket, User
+from ..models import Payment, Raffle, Ticket
 from ..schemas import RaffleCreate, RaffleResponse, SpecialGameItem
 
 router = APIRouter(prefix="/api/raffles", tags=["raffles"])
@@ -63,7 +64,6 @@ def get_active_raffle(db: Session = Depends(get_db)):
         .first()
     )
     if not raffle:
-        # Fallback a la más reciente creada
         raffle = db.query(Raffle).order_by(Raffle.id.desc()).first()
 
     if not raffle:
@@ -86,7 +86,11 @@ def get_raffle_by_id(raffle_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{raffle_id}/activate", response_model=RaffleResponse)
-def activate_raffle(raffle_id: int, db: Session = Depends(get_db)):
+def activate_raffle(
+    raffle_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(get_current_admin),
+):
     raffle = db.query(Raffle).filter(Raffle.id == raffle_id).first()
     if not raffle:
         raise HTTPException(
@@ -110,9 +114,18 @@ def list_raffles(db: Session = Depends(get_db)):
 def create_raffle(
     payload: RaffleCreate,
     db: Session = Depends(get_db),
+    _: dict = Depends(get_current_admin),
 ):
-    # Marcar rifas activas anteriores como archivadas en la misma transacción
-    db.query(Raffle).filter(Raffle.status == "active").update({"status": "archived"})
+    # Eliminación atómica de rifas anteriores en orden de dependencias FK
+    old_raffles = db.query(Raffle).all()
+    for old in old_raffles:
+        old_ticket_ids = [t.id for t in db.query(Ticket.id).filter(Ticket.raffle_id == old.id).all()]
+        if old_ticket_ids:
+            db.query(Payment).filter(Payment.ticket_id.in_(old_ticket_ids)).delete(synchronize_session=False)
+        db.query(Ticket).filter(Ticket.raffle_id == old.id).delete(synchronize_session=False)
+    db.query(Raffle).delete(synchronize_session=False)
+    db.flush()
+    db.expire_all()
 
     total_numbers = payload.get_total_numbers()
     ticket_price_usd = payload.get_ticket_price()
@@ -135,7 +148,6 @@ def create_raffle(
             })
         special_games_json = json.dumps(games_list)
     else:
-        # Default games
         special_games_json = json.dumps([
             {"id": 1, "name": "Sorteo Anticipado 1", "min_amount": 3.0, "draw_date": None, "drawDate": None},
             {"id": 2, "name": "Sorteo Anticipado 2", "min_amount": 5.0, "draw_date": None, "drawDate": None},
@@ -154,8 +166,7 @@ def create_raffle(
         status="active",
     )
     db.add(new_raffle)
-    db.commit()
-    db.refresh(new_raffle)
+    db.flush()
 
     tickets_to_create = []
     if scheme == "triples_333" or total_numbers == 333:
@@ -203,7 +214,10 @@ def create_raffle(
                     total_paid_usd=0.0,
                 )
             )
+
     db.bulk_save_objects(tickets_to_create)
     db.commit()
 
-    return enrich_raffle_response(new_raffle, db)
+    # Re-fetch para evitar identity map stale después del bulk insert
+    fresh_raffle = db.query(Raffle).filter(Raffle.id == new_raffle.id).first()
+    return enrich_raffle_response(fresh_raffle, db)

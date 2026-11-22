@@ -2,7 +2,13 @@ from datetime import datetime, timedelta, timezone
 import json
 from sqlalchemy.orm import Session
 from .models import User, ExchangeRate, Raffle, Ticket, Payment
-from .auth import hash_password
+def hash_password(password: str) -> str:
+    try:
+        import bcrypt
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+    except ImportError:
+        return password
 
 
 def seed_initial_data(db: Session):

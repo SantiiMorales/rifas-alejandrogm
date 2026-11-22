@@ -11,13 +11,22 @@ import { generateTicketsForScheme, TicketSchemeType } from './ticketSchemes';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+const TOKEN_KEY = 'admin_access_token';
+
 function getAuthHeaders(): HeadersInit {
   if (typeof window === 'undefined') return { 'Content-Type': 'application/json' };
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem(TOKEN_KEY);
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+}
+
+function handleUnauthorized(res: Response): void {
+  if (res.status === 401 && typeof window !== 'undefined') {
+    localStorage.removeItem(TOKEN_KEY);
+    window.location.href = '/login?expired=1';
+  }
 }
 
 export async function loginAdmin(username: string, password: string) {
@@ -32,7 +41,7 @@ export async function loginAdmin(username: string, password: string) {
   }
   const data = await res.json();
   if (typeof window !== 'undefined') {
-    localStorage.setItem('token', data.access_token);
+    localStorage.setItem(TOKEN_KEY, data.access_token);
     localStorage.setItem('user', JSON.stringify({ username: data.username, is_admin: data.is_admin }));
   }
   return data;
@@ -40,8 +49,10 @@ export async function loginAdmin(username: string, password: string) {
 
 export function logoutAdmin() {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('token');
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem('user');
+    // Limpiar también la clave legacy por si acaso
+    localStorage.removeItem('token');
   }
 }
 
@@ -53,6 +64,11 @@ export function getStoredUser() {
   } catch {
     return null;
   }
+}
+
+export function getAdminToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 // Fallback por defecto para renderizado instantáneo (0ms)
@@ -404,6 +420,7 @@ export async function createRaffle(payload: {
   }
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const errorText = await res.text().catch(() => '');
     let errorDetail = 'Error del servidor al crear la rifa';
     try {
@@ -630,6 +647,7 @@ export async function addTicketPayment(
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
+    handleUnauthorized(res);
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Error al registrar el abono');
   }
@@ -642,6 +660,7 @@ export async function releaseTicket(ticketId: number): Promise<Ticket> {
     headers: getAuthHeaders(),
   });
   if (!res.ok) {
+    handleUnauthorized(res);
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Error al liberar el boleto');
   }
@@ -791,6 +810,7 @@ export async function updateExchangeRates(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
+    handleUnauthorized(res);
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Error al actualizar tasas');
   }
