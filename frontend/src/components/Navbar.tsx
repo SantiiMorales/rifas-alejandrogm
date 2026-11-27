@@ -138,8 +138,9 @@ export default function Navbar({ onOpenCreateRaffle, onOpenRates, rates }: Navba
             {/* Toggle Menú Móvil */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? 'Cerrar navegación móvil' : 'Abrir navegación móvil'}
               className="lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg bg-[#FFFFFF] text-[#0B1526] border border-[#DCE4EE] shadow-subtle"
-              aria-label="Abrir navegación móvil"
             >
               {mobileMenuOpen ? <X className="w-5 h-5 text-[#0369A1]" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -148,21 +149,23 @@ export default function Navbar({ onOpenCreateRaffle, onOpenRates, rates }: Navba
 
         {/* Menú Móvil Desplegable */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-3 border-t border-[#DCE4EE] space-y-1">
+          <div className="lg:hidden py-3 border-t border-[#DCE4EE] space-y-1 animate-fade-in-up">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
                 <button
                   key={item.href}
+                  type="button"
                   onClick={() => {
                     router.push(item.href);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full min-h-[44px] flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`w-full min-h-[44px] flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-all border-l-4 ${
                     isActive
-                      ? 'bg-[#E0F2FE] text-[#0369A1] border-l-4 border-[#0369A1]'
-                      : 'text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6]'
+                      ? 'bg-[#E0F2FE] text-[#0369A1] border-[#0369A1]'
+                      : 'text-[#475569] border-transparent hover:text-[#0B1526] hover:bg-[#EAF0F6]'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-[#0369A1]' : 'text-[#64748B]'}`} />

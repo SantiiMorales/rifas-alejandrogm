@@ -46,6 +46,7 @@ export default function CustomSelect({
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const listboxId = React.useId();
 
   useEffect(() => {
     setMounted(true);
@@ -155,6 +156,9 @@ export default function CustomSelect({
         type="button"
         onClick={handleToggle}
         disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
         className={`w-full min-w-0 max-w-full overflow-hidden min-h-[42px] px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border shadow-subtle transition-all select-none focus:outline-none ${
           isAmber
             ? 'bg-[#FEFCE8] border-[#FEF08A] text-[#854D0E] focus-visible:ring-2 focus-visible:ring-[#EAB308]'
@@ -190,6 +194,9 @@ export default function CustomSelect({
         createPortal(
           <div
             ref={menuRef}
+            id={listboxId}
+            role="listbox"
+            aria-label={label || placeholder}
             style={{
               position: 'fixed',
               top: `${coords.top}px`,
@@ -208,12 +215,14 @@ export default function CustomSelect({
                   <button
                     key={opt.value}
                     type="button"
+                    role="option"
+                    aria-selected={isSelected}
                     onClick={() => {
                       onChange(opt.value);
                       setIsOpen(false);
                     }}
                     onMouseEnter={() => setHighlightedIndex(idx)}
-                    className={`w-full min-h-[38px] px-3 py-2 rounded-lg text-left text-xs transition-colors flex items-center justify-between gap-2.5 ${
+                    className={`w-full min-h-[40px] px-3 py-2 rounded-lg text-left text-xs transition-colors flex items-center justify-between gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] ${
                       isSelected
                         ? isAmber
                           ? 'bg-[#FEFCE8] text-[#854D0E] font-bold'

@@ -290,8 +290,12 @@ export async function fetchActiveRaffle(targetId?: number): Promise<Raffle> {
     if (preferredId) {
       const resById = await fetch(`${API_BASE}/api/raffles/${preferredId}`, {
         cache: 'no-store',
+        headers: getAuthHeaders(),
         signal: controller.signal,
       });
+      if (resById.status === 401) {
+        handleUnauthorized(resById);
+      }
       if (resById.ok) {
         const r = await resById.json();
         saveLocalActiveRaffle(r);
@@ -304,8 +308,12 @@ export async function fetchActiveRaffle(targetId?: number): Promise<Raffle> {
 
     const res = await fetch(`${API_BASE}/api/raffles/active`, {
       cache: 'no-store',
+      headers: getAuthHeaders(),
       signal: controller.signal,
     });
+    if (res.status === 401) {
+      handleUnauthorized(res);
+    }
     if (res.ok) {
       const r = await res.json();
       saveLocalActiveRaffle(r);
@@ -317,8 +325,12 @@ export async function fetchActiveRaffle(targetId?: number): Promise<Raffle> {
 
     const resList = await fetch(`${API_BASE}/api/raffles`, {
       cache: 'no-store',
+      headers: getAuthHeaders(),
       signal: controller.signal,
     });
+    if (resList.status === 401) {
+      handleUnauthorized(resList);
+    }
     if (resList.ok) {
       const list = await resList.json();
       if (list && list.length > 0) {
@@ -517,8 +529,13 @@ export async function fetchTickets(params: {
 
     const res = await fetch(url.toString(), {
       cache: 'no-store',
+      headers: getAuthHeaders(),
       signal: controller.signal,
     });
+
+    if (res.status === 401) {
+      handleUnauthorized(res);
+    }
 
     if (res.ok) {
       const tList = await res.json();
@@ -684,7 +701,13 @@ export async function releaseTicket(ticketId: number): Promise<Ticket> {
 
 export async function fetchFinanceSummary(): Promise<FinanceSummary> {
   try {
-    const res = await fetch(`${API_BASE}/api/finances/summary`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/api/finances/summary`, {
+      cache: 'no-store',
+      headers: getAuthHeaders(),
+    });
+    if (res.status === 401) {
+      handleUnauthorized(res);
+    }
     if (!res.ok) {
       return {
         total_collected_usd: 30.0,
@@ -738,7 +761,13 @@ export const DEFAULT_FINANCE_CHART_WEEK: FinanceChartPoint[] = [
 export async function fetchFinanceChart(period: 'day' | 'week'): Promise<FinanceChartPoint[]> {
   const fallback = period === 'day' ? DEFAULT_FINANCE_CHART_DAY : DEFAULT_FINANCE_CHART_WEEK;
   try {
-    const res = await fetch(`${API_BASE}/api/finances/chart?period=${period}`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/api/finances/chart?period=${period}`, {
+      cache: 'no-store',
+      headers: getAuthHeaders(),
+    });
+    if (res.status === 401) {
+      handleUnauthorized(res);
+    }
     if (!res.ok) return fallback;
     const json = await res.json();
     return json && json.length > 0 ? json : fallback;
@@ -793,7 +822,13 @@ export const DEFAULT_DAILY_SALES: DailySalesResponse = {
 export async function fetchDailySales(dateStr?: string): Promise<DailySalesResponse> {
   try {
     const endpoint = `${API_BASE}/api/finances/daily-sales${dateStr ? `?date=${encodeURIComponent(dateStr)}` : ''}`;
-    const res = await fetch(endpoint, { cache: 'no-store' });
+    const res = await fetch(endpoint, {
+      cache: 'no-store',
+      headers: getAuthHeaders(),
+    });
+    if (res.status === 401) {
+      handleUnauthorized(res);
+    }
     if (!res.ok) throw new Error('Error al cargar ventas');
     return await res.json();
   } catch {
@@ -806,7 +841,13 @@ export async function fetchDailySales(dateStr?: string): Promise<DailySalesRespo
 
 export async function fetchExchangeRates(): Promise<ExchangeRate> {
   try {
-    const res = await fetch(`${API_BASE}/api/finances/rates`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/api/finances/rates`, {
+      cache: 'no-store',
+      headers: getAuthHeaders(),
+    });
+    if (res.status === 401) {
+      handleUnauthorized(res);
+    }
     if (!res.ok) return DEFAULT_EXCHANGE_RATES;
     return await res.json();
   } catch {

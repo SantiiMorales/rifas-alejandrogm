@@ -213,15 +213,25 @@ export default function CreateRaffleModal({
   // Modal de confirmación destructiva
   if (showDestructiveModal) {
     return (
-      <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/60 backdrop-blur-sm">
-        <div className="w-full max-w-md bg-[#FFFFFF] border border-red-200 rounded-lg shadow-modal animate-scale-in overflow-hidden">
+      <div
+        className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/60 backdrop-blur-sm animate-fade-in"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) setShowDestructiveModal(false);
+        }}
+      >
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="destructive-modal-title"
+          className="w-full max-w-md bg-[#FFFFFF] border border-red-200 rounded-lg shadow-modal animate-scale-in overflow-hidden"
+        >
           {/* Cabecera de peligro */}
           <div className="p-4 bg-[#FEF2F2] border-b border-red-200 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-[#FEE2E2] flex-shrink-0">
               <AlertTriangle className="w-6 h-6 text-[#DC2626]" />
             </div>
             <div>
-              <h2 className="text-sm font-display font-bold text-[#991B1B] uppercase tracking-wider">
+              <h2 id="destructive-modal-title" className="text-sm font-display font-bold text-[#991B1B] uppercase tracking-wider">
                 ¿Reemplazar la rifa actual?
               </h2>
               <p className="text-[11px] text-[#B91C1C] mt-0.5">Esta acción no se puede deshacer</p>
@@ -251,11 +261,11 @@ export default function CreateRaffleModal({
           </div>
 
           {/* Pie de botones */}
-          <div className="p-3 bg-[#F9FAFB] border-t border-[#E5E7EB] flex items-center justify-end gap-2.5">
+          <div className="p-3 bg-[#F9FAFB] border-t border-[#E5E7EB] flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={() => setShowDestructiveModal(false)}
-              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all"
+              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               Cancelar
             </button>
@@ -263,7 +273,7 @@ export default function CreateRaffleModal({
               type="button"
               disabled={!destructiveConfirmed || isCreating}
               onClick={() => pendingPayloadRef.current && doCreateRaffle(pendingPayloadRef.current)}
-              className="min-h-[44px] px-4 py-2 bg-[#DC2626] hover:bg-[#B91C1C] disabled:bg-[#FCA5A5] disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-subtle transition-all flex items-center gap-2"
+              className="min-h-[44px] px-4 py-2 bg-[#DC2626] hover:bg-[#B91C1C] disabled:bg-[#FCA5A5] disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-subtle transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
             >
               {isCreating ? (
                 <>
@@ -281,9 +291,17 @@ export default function CreateRaffleModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm animate-fade-in"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !isCreating) onClose();
+      }}
+    >
       <div
         ref={modalScrollRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-raffle-title"
         className="relative w-[calc(100%-1rem)] sm:w-full max-w-xl max-h-[90dvh] overflow-y-auto bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg p-4 sm:p-6 shadow-modal animate-scale-in"
       >
         {/* Encabezado Encapsulado */}
@@ -293,7 +311,7 @@ export default function CreateRaffleModal({
               <Sparkles className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-display font-bold text-[#0B1526] uppercase tracking-wider truncate">
+              <h2 id="create-raffle-title" className="text-sm font-display font-bold text-[#0B1526] uppercase tracking-wider truncate">
                 Crear Nueva Rifa Oficial
               </h2>
               <p className="text-[11px] text-[#475569] truncate">
@@ -332,6 +350,7 @@ export default function CreateRaffleModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ej: Gran Rifa Moto Bera SBR 2026"
+              aria-label="Título del sorteo"
               className="w-full px-3 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-sm focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] transition-colors"
             />
           </div>
@@ -346,6 +365,7 @@ export default function CreateRaffleModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="1er Premio Moto 0km. 2do Premio $100 USD..."
               rows={2}
+              aria-label="Descripción y premios del sorteo"
               className="w-full px-3 py-2.5 sm:py-2 min-h-[64px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] resize-none transition-colors"
             />
           </div>
@@ -423,6 +443,8 @@ export default function CreateRaffleModal({
                   onChange={(e) =>
                     setTicketPrice(e.target.value === '' ? '' : Number(e.target.value))
                   }
+                  inputMode="decimal"
+                  aria-label="Precio del boleto en dólares"
                   className="w-full px-3 py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#059669] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none focus:bg-[#FFFFFF]"
                 />
               </div>
@@ -439,6 +461,8 @@ export default function CreateRaffleModal({
                   onChange={(e) =>
                     setTotalInvestment(e.target.value === '' ? '' : Number(e.target.value))
                   }
+                  inputMode="decimal"
+                  aria-label="Inversión total en dólares"
                   className="w-full px-3 py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none focus:bg-[#FFFFFF]"
                 />
               </div>
@@ -470,7 +494,7 @@ export default function CreateRaffleModal({
               {specialGames.map((game, index) => (
                 <div
                   key={game.id}
-                  className="p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle space-y-2"
+                  className="p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle space-y-2 animate-fade-in-up"
                 >
                   {/* Línea 1 (Principal): Badge + Input de descripción full width + Botón eliminar */}
                   <div className="flex items-center gap-2 w-full">
@@ -482,6 +506,7 @@ export default function CreateRaffleModal({
                       value={game.name}
                       onChange={(e) => handleUpdateGame(game.id, 'name', e.target.value)}
                       placeholder="Nombre o descripción del premio del sorteo anticipado"
+                      aria-label={`Nombre del juego especial #${index + 1}`}
                       className="flex-1 min-w-0 w-full bg-[#FFFFFF] border border-[#CBD5E1] rounded-lg text-[#0B1526] placeholder:text-[#64748B] px-3 py-2 text-base sm:text-sm font-medium focus:outline-none focus:border-[#0EA5E9] focus:ring-1 focus:ring-[#0EA5E9] transition-all"
                     />
                     <button
@@ -524,6 +549,8 @@ export default function CreateRaffleModal({
                             e.target.value === '' ? '' : Number(e.target.value)
                           )
                         }
+                        inputMode="decimal"
+                        aria-label={`Abono mínimo del juego especial #${index + 1}`}
                         className="w-20 px-2.5 py-1.5 min-h-[38px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#059669] font-mono tabular-nums font-bold text-base sm:text-xs focus:bg-[#FFFFFF] focus:border-[#0EA5E9] focus:outline-none text-right"
                       />
                       <span className="text-[10px] text-[#64748B] font-mono font-bold">USD</span>
@@ -558,26 +585,26 @@ export default function CreateRaffleModal({
 
           {/* Mensaje de Error Visible Encima del Footer */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold flex items-center gap-2 animate-scale-in">
+            <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold flex items-center gap-2 animate-shake">
               <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Botones Encapsulados (Footer) */}
-          <div className="flex items-center justify-end gap-2.5 p-2.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 p-2.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg">
             <button
               type="button"
               onClick={onClose}
               disabled={isCreating}
-              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all disabled:opacity-50"
+              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isCreating}
-              className="min-h-[44px] px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-subtle transition-all disabled:opacity-50 flex items-center gap-2"
+              className="min-h-[44px] px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-subtle transition-all disabled:opacity-50 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               {isCreating ? (
                 <>

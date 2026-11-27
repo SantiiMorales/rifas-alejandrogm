@@ -80,7 +80,7 @@ export default function FinancesPage() {
             loadFinances();
           }}
           disabled={refreshing}
-          className="min-h-[44px] sm:min-h-0 self-start sm:self-auto flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 bg-[#FFFFFF] hover:bg-[#EAF0F6] active:scale-[0.98] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-bold shadow-subtle transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
+          className="min-h-[44px] sm:min-h-0 self-start sm:self-auto flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 bg-[#FFFFFF] hover:bg-[#EAF0F6] active:scale-[0.98] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-bold shadow-subtle transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#0369A1]' : ''}`} />
           <span>Actualizar</span>

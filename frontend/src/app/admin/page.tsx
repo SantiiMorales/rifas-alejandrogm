@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="space-y-4 sm:space-y-5 animate-fade-in-up">
       {/* Banner de Rifa Activa */}
       <div className="bg-[#FFFFFF] p-4 sm:p-5 border border-[#DCE4EE] rounded-lg shadow-subtle">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="min-h-[44px] sm:min-h-0 self-start sm:self-auto flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-semibold shadow-subtle transition-colors"
+            className="min-h-[44px] sm:min-h-0 self-start sm:self-auto flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 bg-[#FFFFFF] hover:bg-[#EAF0F6] active:scale-[0.98] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-semibold shadow-subtle transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#0369A1]' : ''}`} />
             <span>Refrescar</span>
@@ -126,8 +126,8 @@ export default function AdminDashboardPage() {
 
         {/* Indicadores Sólidos Encapsulados */}
         <div className="mt-4 p-2.5 sm:p-3 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <div className="p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="p-2 bg-[#EAF0F6] rounded-lg border border-[#DCE4EE] flex items-center justify-center flex-shrink-0">
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-out">
+            <div className="p-2 bg-[#EAF0F6] rounded-lg border border-[#DCE4EE] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <Layers className="w-4 h-4 text-[#475569]" />
             </div>
             <div className="min-w-0">
@@ -136,8 +136,8 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="p-2 bg-[#ECFDF5] rounded-lg border border-[#A7F3D0] flex items-center justify-center flex-shrink-0">
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-out">
+            <div className="p-2 bg-[#ECFDF5] rounded-lg border border-[#A7F3D0] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <TicketIcon className="w-4 h-4 text-[#059669]" />
             </div>
             <div className="min-w-0">
@@ -146,8 +146,8 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="p-2 bg-[#E0F2FE] rounded-lg border border-[#BAE6FD] flex items-center justify-center flex-shrink-0">
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-out">
+            <div className="p-2 bg-[#E0F2FE] rounded-lg border border-[#BAE6FD] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <Clock className="w-4 h-4 text-[#0369A1]" />
             </div>
             <div className="min-w-0">
@@ -156,8 +156,8 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="p-2 bg-[#ECFDF5] rounded-lg border border-[#A7F3D0] flex items-center justify-center flex-shrink-0">
+          <div className="group p-2.5 sm:p-3 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle flex items-center gap-2.5 sm:gap-3 min-w-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-out">
+            <div className="p-2 bg-[#ECFDF5] rounded-lg border border-[#A7F3D0] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <CheckCircle2 className="w-4 h-4 text-[#059669]" />
             </div>
             <div className="min-w-0">

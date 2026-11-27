@@ -339,9 +339,17 @@ export default function TicketDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm animate-fade-in"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
         ref={ticketCardRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ticket-modal-title"
         className="relative w-[calc(100%-1rem)] sm:w-full max-w-xl max-h-[90dvh] overflow-y-auto bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg p-4 sm:p-6 shadow-modal animate-scale-in"
       >
         {/* Cabecera Encapsulada */}
@@ -356,7 +364,7 @@ export default function TicketDetailModal({
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-display text-base sm:text-lg font-bold text-[#0B1526] truncate">Ticket #{ticket.ticket_number}</h2>
+                <h2 id="ticket-modal-title" className="font-display text-base sm:text-lg font-bold text-[#0B1526] truncate">Ticket #{ticket.ticket_number}</h2>
                 <span
                   className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                     isPaid
@@ -424,7 +432,7 @@ export default function TicketDetailModal({
                 onClick={handleShareTicket}
                 disabled={sharing}
                 data-share-ignore="true"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg bg-[#FFFFFF] border border-[#DCE4EE] text-[#475569] hover:text-[#0369A1] hover:bg-[#EAF0F6] shadow-subtle transition-colors disabled:opacity-50"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg bg-[#FFFFFF] border border-[#DCE4EE] text-[#475569] hover:text-[#0369A1] hover:bg-[#EAF0F6] shadow-subtle transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
                 title="Compartir comprobante WhatsApp"
                 aria-label="Compartir comprobante"
               >
@@ -439,7 +447,7 @@ export default function TicketDetailModal({
               type="button"
               onClick={onClose}
               data-share-ignore="true"
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg text-[#64748B] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg text-[#64748B] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
               aria-label="Cerrar modal"
             >
               <X className="w-5 h-5" />
@@ -450,7 +458,9 @@ export default function TicketDetailModal({
         {feedbackMessage && (
           <div
             data-share-ignore="true"
-            className="mt-3 p-2.5 bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] rounded-lg text-xs text-center font-semibold"
+            role="status"
+            aria-live="polite"
+            className="mt-3 p-2.5 bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] rounded-lg text-xs text-center font-semibold animate-fade-in"
           >
             {feedbackMessage}
           </div>
@@ -459,7 +469,8 @@ export default function TicketDetailModal({
         {error && (
           <div
             data-share-ignore="true"
-            className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium"
+            role="alert"
+            className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium animate-shake"
           >
             {error}
           </div>
@@ -481,7 +492,7 @@ export default function TicketDetailModal({
               <div>
                 <label className="block font-semibold text-[#475569] mb-1">Nombre Completo *</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-3.5 w-4 h-4 text-[#64748B]" />
+                  <User className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
                   <input
                     type="text"
                     value={custName}
@@ -490,6 +501,8 @@ export default function TicketDetailModal({
                       if (error) setError('');
                     }}
                     placeholder="Ej: Juan Pérez"
+                    autoComplete="name"
+                    aria-label="Nombre completo del comprador"
                     className="w-full pl-10 pr-3 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs font-medium focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] transition-colors"
                     required
                   />
@@ -499,15 +512,18 @@ export default function TicketDetailModal({
               <div>
                 <label className="block font-semibold text-[#475569] mb-1">Teléfono / WhatsApp *</label>
                 <div className="relative">
-                  <Phone className="absolute left-3.5 top-3.5 w-4 h-4 text-[#64748B]" />
+                  <Phone className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
                   <input
-                    type="text"
+                    type="tel"
+                    inputMode="tel"
                     value={custPhone}
                     onChange={(e) => {
                       setCustPhone(e.target.value);
                       if (error) setError('');
                     }}
                     placeholder="Ej: +58 412 1234567"
+                    autoComplete="tel"
+                    aria-label="Teléfono o WhatsApp del comprador"
                     className="w-full pl-10 pr-3 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs font-medium focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] transition-colors font-mono tabular-nums"
                     required
                   />
@@ -517,7 +533,7 @@ export default function TicketDetailModal({
               <div>
                 <label className="block font-semibold text-[#475569] mb-1">Dirección (Opcional)</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-[#64748B]" />
+                  <MapPin className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
                   <input
                     type="text"
                     value={custAddress}
@@ -526,6 +542,8 @@ export default function TicketDetailModal({
                       if (error) setError('');
                     }}
                     placeholder="Ciudad / Sector"
+                    autoComplete="address-level2"
+                    aria-label="Dirección del comprador"
                     className="w-full pl-10 pr-3 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs font-medium focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] transition-colors"
                   />
                 </div>
@@ -539,6 +557,7 @@ export default function TicketDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <input
                     type="number"
+                    inputMode="decimal"
                     step="any"
                     min="0"
                     value={initPayment}
@@ -547,11 +566,13 @@ export default function TicketDetailModal({
                       if (error) setError('');
                     }}
                     placeholder="Monto"
+                    aria-label="Monto del abono inicial"
                     className="sm:col-span-2 px-3 py-2 min-h-[44px] bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg text-[#059669] font-mono tabular-nums font-bold text-base sm:text-xs focus:outline-none focus:border-[#0EA5E9] shadow-subtle"
                   />
                   <select
                     value={initCurrency}
                     onChange={(e) => setInitCurrency(e.target.value as any)}
+                    aria-label="Moneda del abono inicial"
                     className="py-2 px-3 min-h-[44px] bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg text-[#0B1526] font-bold text-base sm:text-xs focus:outline-none shadow-subtle cursor-pointer"
                   >
                     <option value="USD">USD ($)</option>
@@ -567,18 +588,18 @@ export default function TicketDetailModal({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg">
               <button
                 type="button"
                 onClick={onClose}
-                className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all"
+                className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="min-h-[44px] px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white text-xs font-semibold uppercase tracking-wider rounded-lg shadow-subtle transition-all disabled:opacity-50"
+                className="min-h-[44px] px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white text-xs font-semibold uppercase tracking-wider rounded-lg shadow-subtle transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
               >
                 {loading ? 'Apartando...' : 'Apartar Boleto'}
               </button>
@@ -610,9 +631,16 @@ export default function TicketDetailModal({
                 <span className="font-mono tabular-nums font-bold text-[#0B1526]">{ticket.percent_paid}%</span>
               </div>
 
-              <div className="w-full h-3 bg-[#EAF0F6] rounded-full overflow-hidden border border-[#DCE4EE]">
+              <div
+                role="progressbar"
+                aria-valuenow={ticket.percent_paid}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Progreso de pago del boleto"
+                className="w-full h-3 bg-[#EAF0F6] rounded-full overflow-hidden border border-[#DCE4EE]"
+              >
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${isPaid ? 'bg-[#059669]' : 'bg-[#0EA5E9]'}`}
+                  className={`h-full rounded-full transition-all duration-500 ease-out ${isPaid ? 'bg-[#059669]' : 'bg-[#0EA5E9]'}`}
                   style={{ width: `${ticket.percent_paid}%` }}
                 />
               </div>
@@ -658,6 +686,7 @@ export default function TicketDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <input
                     type="number"
+                    inputMode="decimal"
                     step="any"
                     min="0.1"
                     value={abonoAmount}
@@ -666,12 +695,14 @@ export default function TicketDetailModal({
                       if (error) setError('');
                     }}
                     placeholder="Monto"
+                    aria-label="Monto del nuevo abono"
                     className="sm:col-span-2 px-3 py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#059669] font-mono tabular-nums font-bold text-base sm:text-xs focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF]"
                     required
                   />
                   <select
                     value={abonoCurrency}
                     onChange={(e) => setAbonoCurrency(e.target.value as any)}
+                    aria-label="Moneda del nuevo abono"
                     className="py-2 px-3 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] font-bold text-base sm:text-xs focus:outline-none cursor-pointer"
                   >
                     <option value="USD">USD ($)</option>
@@ -694,6 +725,7 @@ export default function TicketDetailModal({
                     if (error) setError('');
                   }}
                   placeholder="Nota opcional del pago..."
+                  aria-label="Nota opcional del pago"
                   className="w-full px-3 py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs focus:bg-[#FFFFFF] focus:outline-none focus:border-[#0EA5E9]"
                 />
 
@@ -701,7 +733,7 @@ export default function TicketDetailModal({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="min-h-[44px] px-5 py-2 bg-[#0369A1] text-white font-semibold rounded-lg hover:bg-[#075985] shadow-subtle transition-colors flex items-center justify-center"
+                    className="min-h-[44px] w-full sm:w-auto px-5 py-2 bg-[#0369A1] text-white font-semibold rounded-lg hover:bg-[#075985] shadow-subtle transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2 disabled:opacity-50"
                   >
                     {loading ? 'Guardando...' : 'Confirmar Abono'}
                   </button>
@@ -739,13 +771,13 @@ export default function TicketDetailModal({
 
             <div
               data-share-ignore="true"
-              className="flex items-center justify-between p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg gap-2"
+              className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg gap-2"
             >
               <button
                 type="button"
                 onClick={handleRelease}
                 disabled={loading}
-                className="min-h-[44px] flex items-center gap-1.5 px-3 py-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-semibold border border-transparent hover:border-red-200"
+                className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-semibold border border-transparent hover:border-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 disabled:opacity-50"
               >
                 <Trash2 className="w-3.5 h-3.5 flex-shrink-0" />
                 <span>Liberar Boleto</span>
@@ -753,7 +785,7 @@ export default function TicketDetailModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all"
+                className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] text-xs font-semibold rounded-lg border border-[#CBD5E1] shadow-subtle transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
               >
                 Cerrar
               </button>

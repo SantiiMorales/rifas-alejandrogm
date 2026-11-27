@@ -76,8 +76,8 @@ export default function DatePickerPopover({
   const updatePosition = useCallback(() => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
-    const popoverWidth = 280;
-    const popoverHeight = 310;
+    const popoverWidth = 300;
+    const popoverHeight = 340;
     const padding = 8;
 
     let left = rect.left;
@@ -201,6 +201,8 @@ export default function DatePickerPopover({
         ref={triggerRef}
         type="button"
         onClick={handleToggle}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
         className={`min-h-[38px] px-2.5 py-1.5 bg-[#FFFFFF] border ${
           value ? 'border-[#BAE6FD] text-[#0B1526]' : 'border-[#CBD5E1] text-[#475569]'
         } rounded-lg text-xs font-semibold hover:bg-[#F8FAFC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-1 transition-all flex items-center gap-2 shadow-subtle`}
@@ -211,6 +213,7 @@ export default function DatePickerPopover({
         {value ? (
           <span
             onClick={handleClear}
+            aria-hidden="true"
             className="ml-1 p-0.5 rounded hover:bg-[#EAF0F6] text-[#64748B] hover:text-[#0B1526] transition-colors"
             title="Limpiar fecha"
           >
@@ -225,20 +228,22 @@ export default function DatePickerPopover({
         createPortal(
           <div
             ref={popoverRef}
+            role="dialog"
+            aria-label="Selector de fecha del sorteo"
             style={{
               position: 'fixed',
               top: `${coords.top}px`,
               left: `${coords.left}px`,
               zIndex: 9999,
             }}
-            className="w-[280px] bg-[#FFFFFF] border border-[#DCE4EE] rounded-xl shadow-xl shadow-slate-900/10 p-3 select-none animate-scale-in"
+            className="w-[300px] max-w-[calc(100vw-1rem)] bg-[#FFFFFF] border border-[#DCE4EE] rounded-xl shadow-xl shadow-slate-900/10 p-3 select-none animate-scale-in"
           >
             {/* Cabecera del Mes */}
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#DCE4EE]">
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="min-h-[32px] min-w-[32px] flex items-center justify-center p-1 rounded-lg text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors"
+                className="min-h-[32px] min-w-[32px] flex items-center justify-center p-1 rounded-lg text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9]"
                 aria-label="Mes anterior"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -249,7 +254,7 @@ export default function DatePickerPopover({
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="min-h-[32px] min-w-[32px] flex items-center justify-center p-1 rounded-lg text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors"
+                className="min-h-[32px] min-w-[32px] flex items-center justify-center p-1 rounded-lg text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9]"
                 aria-label="Mes siguiente"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -286,7 +291,10 @@ export default function DatePickerPopover({
                     key={`day-${dayNum}`}
                     type="button"
                     onClick={() => handleSelectDay(dayNum)}
-                    className={`h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-xs font-mono tabular-nums transition-all ${
+                    aria-pressed={isSelected}
+                    aria-current={isToday ? 'date' : undefined}
+                    aria-label={`${dayNum} de ${SPANISH_MONTHS[viewMonth]} de ${viewYear}`}
+                    className={`h-9 w-9 mx-auto flex items-center justify-center rounded-lg text-xs font-mono tabular-nums transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] ${
                       isSelected
                         ? 'bg-[#0369A1] text-white font-bold shadow-sm'
                         : isToday

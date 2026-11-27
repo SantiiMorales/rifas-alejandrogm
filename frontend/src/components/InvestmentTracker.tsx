@@ -232,7 +232,14 @@ export default function InvestmentTracker({ summary, raffle }: InvestmentTracker
           )}
 
           {/* Track contenedor de la barra */}
-          <div className="relative w-full h-4 sm:h-5 bg-[#EAF0F6] rounded-full overflow-hidden border border-[#DCE4EE] shadow-inner">
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Number(currentPct.toFixed(1))}
+            aria-label="Progreso de recaudación hacia el punto de equilibrio"
+            className="relative w-full h-4 sm:h-5 bg-[#EAF0F6] rounded-full overflow-hidden border border-[#DCE4EE] shadow-inner"
+          >
             {/* Zona 1: Azul primario #0369A1 (0% hasta el punto de inversión) */}
             <div
               className="absolute top-0 bottom-0 left-0 bg-[#0369A1] transition-all duration-500 ease-out motion-reduce:transition-none"

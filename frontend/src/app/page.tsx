@@ -16,7 +16,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center p-3 sm:p-4 bg-[#F4F7FA]">
-      <div className="w-full max-w-lg text-center space-y-5 sm:space-y-6">
+      <div className="w-full max-w-lg text-center space-y-5 sm:space-y-6 animate-fade-in-up">
         {/* Emblema GM Autoridad */}
         <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-[#0B1526] border-2 border-[#CBD5E1] shadow-card flex items-center justify-center">
           <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#0EA5E9]">GM</span>
@@ -39,8 +39,9 @@ export default function HomePage() {
         {/* Portal Público de Consulta de Boletos para Clientes */}
         <div className="pt-2 sm:pt-4">
           <button
+            type="button"
             onClick={() => router.push('/consultar')}
-            className="w-full bg-[#FFFFFF] p-5 sm:p-6 border border-[#DCE4EE] hover:border-[#0369A1] rounded-xl text-left flex flex-col justify-between transition-all shadow-subtle hover:shadow-elevated min-h-[140px]"
+            className="group w-full bg-[#FFFFFF] p-5 sm:p-6 border border-[#DCE4EE] hover:border-[#0369A1] rounded-xl text-left flex flex-col justify-between transition-all shadow-subtle hover:shadow-elevated hover:-translate-y-0.5 active:scale-[0.995] min-h-[140px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
           >
             <div>
               <div className="p-2.5 w-fit rounded-lg bg-[#E0F2FE] text-[#0369A1] mb-3">
@@ -53,7 +54,7 @@ export default function HomePage() {
             </div>
             <div className="mt-4 flex items-center gap-1.5 text-xs text-[#0369A1] font-semibold">
               <span>Ir al portal público de consulta</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
             </div>
           </button>
         </div>

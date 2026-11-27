@@ -7,6 +7,7 @@ import {
   Search,
   ShieldCheck,
   ArrowLeft,
+  Loader2,
 } from 'lucide-react';
 import { Ticket } from '@/lib/types';
 import { queryPublicTicket } from '@/lib/api';
@@ -70,28 +71,38 @@ function TicketSearchContent() {
     <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-5">
       {/* Caja de Búsqueda */}
       <div className="bg-[#FFFFFF] p-4 sm:p-5 border border-[#DCE4EE] rounded-lg shadow-subtle">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <label className="block text-xs font-semibold text-[#475569] uppercase tracking-wider">
+        <form onSubmit={handleSubmit} className="space-y-3" aria-busy={loading}>
+          <label
+            htmlFor="public-ticket-query"
+            className="block text-xs font-semibold text-[#475569] uppercase tracking-wider"
+          >
             Ingresa tu Número de Boleto o Teléfono Celular
           </label>
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-[#64748B]" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
               <input
+                id="public-ticket-query"
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ej: 07 o 04125550101"
-                className="w-full pl-10 pr-3 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs font-medium focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] transition-colors"
+                autoComplete="off"
+                spellCheck={false}
+                className="w-full pl-10 pr-3 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs font-medium focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] focus:ring-2 focus:ring-[#0EA5E9]/25 transition-colors"
                 required
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="min-h-[44px] px-5 py-2.5 bg-[#0369A1] hover:bg-[#075985] text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors flex items-center justify-center gap-1.5"
+              className="min-h-[44px] px-5 py-2.5 bg-[#0369A1] hover:bg-[#075985] active:scale-[0.99] text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
-              <Search className="w-4 h-4 flex-shrink-0" />
+              {loading ? (
+                <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" />
+              ) : (
+                <Search className="w-4 h-4 flex-shrink-0" />
+              )}
               <span>{loading ? 'Consultando...' : 'Consultar'}</span>
             </button>
           </div>
@@ -102,15 +113,28 @@ function TicketSearchContent() {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center font-medium">
+        <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center font-medium animate-shake">
           {error}
+        </div>
+      )}
+
+      {!tickets && !loading && !error && (
+        <div className="bg-[#FFFFFF] p-6 border border-[#DCE4EE] rounded-lg shadow-subtle text-center space-y-2 animate-fade-in">
+          <ShieldCheck className="w-8 h-8 text-[#059669] mx-auto" />
+          <p className="text-xs font-bold text-[#0B1526] uppercase tracking-wider">
+            Consulta 100% Segura
+          </p>
+          <p className="text-[11px] text-[#475569] max-w-sm mx-auto leading-relaxed">
+            Ingresa tu número de boleto o celular para ver el comprobante oficial con tus abonos y
+            sorteos anticipados desbloqueados.
+          </p>
         </div>
       )}
 
       {/* Resultados de Boletos Oficiales */}
       {tickets && tickets.length > 0 && (
-        <div className="space-y-4">
-          <div className="text-center">
+        <div className="space-y-4" aria-live="polite">
+          <div className="text-center animate-fade-in">
             <span className="text-xs text-[#0369A1] font-semibold uppercase tracking-wider">
               Comprobante Oficial Encontrado
             </span>
@@ -119,12 +143,13 @@ function TicketSearchContent() {
             </h2>
           </div>
 
-          {tickets.map((t) => {
+          {tickets.map((t, ticketIndex) => {
             const isPaid = t.status === 'paid';
             return (
               <div
                 key={t.id}
-                className="bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle overflow-hidden"
+                style={{ animationDelay: `${Math.min(ticketIndex, 6) * 45}ms` }}
+                className="bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle overflow-hidden animate-fade-in-up"
               >
                 {/* Cabecera */}
                 <div className="p-3.5 sm:p-4 bg-[#F4F7FA] border-b border-[#DCE4EE] flex flex-col sm:flex-row sm:items-center justify-between gap-3">

@@ -78,8 +78,18 @@ export default function ExchangeRatesModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm">
-      <div className="relative w-[calc(100%-1rem)] sm:w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg p-4 sm:p-6 shadow-modal space-y-4 animate-scale-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B1526]/50 backdrop-blur-sm animate-fade-in"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rates-modal-title"
+        className="relative w-[calc(100%-1rem)] sm:w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg p-4 sm:p-6 shadow-modal space-y-4 animate-scale-in"
+      >
         {/* Cabecera Encapsulada */}
         <div className="p-3 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -87,7 +97,7 @@ export default function ExchangeRatesModal({
               <ArrowRightLeft className="w-5 h-5 text-[#0369A1]" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-display font-bold text-[#0B1526] uppercase tracking-wider truncate">
+              <h2 id="rates-modal-title" className="text-sm sm:text-base font-display font-bold text-[#0B1526] uppercase tracking-wider truncate">
                 Panel de Tasas de Conversión
               </h2>
               <p className="text-[11px] text-[#475569] truncate">
@@ -131,6 +141,8 @@ export default function ExchangeRatesModal({
                     min="0.0001"
                     value={rateBsToCop}
                     onChange={(e) => setRateBsToCop(Number(e.target.value))}
+                    inputMode="decimal"
+                    aria-label="Tasa de Bolívares a Pesos"
                     className="w-full bg-transparent text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none"
                     required
                   />
@@ -173,6 +185,8 @@ export default function ExchangeRatesModal({
                     min="0.01"
                     value={rateBsToUsd}
                     onChange={(e) => setRateBsToUsd(Number(e.target.value))}
+                    inputMode="decimal"
+                    aria-label="Tasa de Bolívares a Dólares"
                     className="w-full bg-transparent text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none"
                     required
                   />
@@ -215,6 +229,8 @@ export default function ExchangeRatesModal({
                     min="0.01"
                     value={rateCopToUsd}
                     onChange={(e) => setRateCopToUsd(Number(e.target.value))}
+                    inputMode="decimal"
+                    aria-label="Tasa de Pesos a Dólares"
                     className="w-full bg-transparent text-[#0B1526] font-mono tabular-nums font-bold text-base sm:text-sm focus:outline-none"
                     required
                   />
@@ -232,18 +248,18 @@ export default function ExchangeRatesModal({
           </div>
 
           {/* Botones Encapsulados */}
-          <div className="p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg flex items-center justify-end gap-2.5">
+          <div className="p-2 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] rounded-lg text-xs font-semibold border border-[#CBD5E1] shadow-subtle transition-colors"
+              className="min-h-[44px] px-4 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] rounded-lg text-xs font-semibold border border-[#CBD5E1] shadow-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="min-h-[44px] flex items-center justify-center gap-2 px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors"
+              className="min-h-[44px] flex items-center justify-center gap-2 px-5 py-2 bg-[#0369A1] hover:bg-[#075985] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               {savedSuccess ? (
                 <>

@@ -72,7 +72,7 @@ export default function Sidebar({
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="md:hidden fixed inset-0 bg-[#0B1526]/40 backdrop-blur-sm z-30 transition-opacity"
+          className="md:hidden fixed inset-0 bg-[#0B1526]/40 backdrop-blur-sm z-30 animate-fade-in"
           aria-hidden="true"
         />
       )}
@@ -81,7 +81,7 @@ export default function Sidebar({
       <aside
         className={`${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } fixed md:sticky top-0 left-0 h-dvh w-72 max-w-[85vw] bg-[#FFFFFF] border-r border-[#DCE4EE] z-40 transition-transform duration-200 flex flex-col justify-between p-4 flex-shrink-0 select-none overflow-y-auto shadow-subtle`}
+        } fixed md:sticky top-0 left-0 h-dvh w-72 max-w-[85vw] bg-[#FFFFFF] border-r border-[#DCE4EE] z-40 transition-transform duration-300 ease-out will-change-transform flex flex-col justify-between p-4 flex-shrink-0 select-none overflow-y-auto shadow-subtle`}
       >
         <div className="space-y-5">
           {/* Cabecera / Marca Alejandro GM Encapsulada */}
@@ -112,7 +112,7 @@ export default function Sidebar({
                 onOpenCreateRaffle();
                 if (window.innerWidth < 768) setIsOpen(false);
               }}
-              className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#0369A1] hover:bg-[#075985] text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors"
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#0369A1] hover:bg-[#075985] text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               <PlusCircle className="w-4 h-4 flex-shrink-0" />
               <span>Crear Nueva Rifa</span>
@@ -123,7 +123,7 @@ export default function Sidebar({
                 onOpenRates();
                 if (window.innerWidth < 768) setIsOpen(false);
               }}
-              className="w-full min-h-[44px] flex items-center justify-between px-3 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-semibold shadow-subtle transition-colors"
+              className="w-full min-h-[44px] flex items-center justify-between px-3 py-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] text-[#0B1526] border border-[#CBD5E1] rounded-lg text-xs font-semibold shadow-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-[#0369A1] flex-shrink-0" />
@@ -136,8 +136,10 @@ export default function Sidebar({
           {/* Desplegable en forma de lista de Paneles a la Izquierda */}
           <div className="space-y-1">
             <button
+              type="button"
               onClick={() => setPanelsDropdownOpen(!panelsDropdownOpen)}
-              className="w-full min-h-[36px] flex items-center justify-between px-2 py-1.5 text-xs font-bold text-[#64748B] uppercase tracking-wider hover:text-[#0B1526] transition-colors"
+              aria-expanded={panelsDropdownOpen}
+              className="w-full min-h-[36px] flex items-center justify-between px-2 py-1.5 text-xs font-bold text-[#64748B] uppercase tracking-wider hover:text-[#0B1526] rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
             >
               <span>Paneles del Sistema</span>
               {panelsDropdownOpen ? (
@@ -148,21 +150,23 @@ export default function Sidebar({
             </button>
 
             {panelsDropdownOpen && (
-              <div className="space-y-1 pt-1">
+              <div className="space-y-1 pt-1 animate-fade-in-up">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
                   return (
                     <button
                       key={item.href}
+                      type="button"
                       onClick={() => {
                         router.push(item.href);
                         if (window.innerWidth < 768) setIsOpen(false);
                       }}
-                      className={`w-full min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors text-left ${
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`w-full min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors text-left border-l-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2 ${
                         isActive
-                          ? 'bg-[#E0F2FE] text-[#0369A1] border-l-4 border-[#0369A1]'
-                          : 'text-[#475569] hover:text-[#0B1526] hover:bg-[#EAF0F6]'
+                          ? 'bg-[#E0F2FE] text-[#0369A1] border-[#0369A1]'
+                          : 'text-[#475569] border-transparent hover:text-[#0B1526] hover:bg-[#EAF0F6]'
                       }`}
                     >
                       <Icon
@@ -210,7 +214,7 @@ export default function Sidebar({
         <div className="p-1.5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg mt-4">
           <button
             onClick={handleLogout}
-            className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
           >
             <LogOut className="w-4 h-4 flex-shrink-0" />
             <span>Cerrar Sesión</span>

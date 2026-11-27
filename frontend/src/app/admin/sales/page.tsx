@@ -65,6 +65,7 @@ export default function DailySalesPage() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
+                aria-label="Seleccionar fecha de las ventas"
                 className="bg-transparent text-[#0B1526] text-base sm:text-xs font-semibold focus:outline-none cursor-pointer w-full font-mono tabular-nums"
               />
             </div>
@@ -75,7 +76,7 @@ export default function DailySalesPage() {
                 loadSales(selectedDate);
               }}
               disabled={refreshing}
-              className="min-h-[44px] min-w-[44px] p-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] active:scale-[0.98] text-[#475569] hover:text-[#0B1526] border border-[#CBD5E1] rounded-lg shadow-subtle transition-all duration-150 flex items-center justify-center flex-shrink-0 focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
+              className="min-h-[44px] min-w-[44px] p-2 bg-[#FFFFFF] hover:bg-[#EAF0F6] active:scale-[0.98] text-[#475569] hover:text-[#0B1526] border border-[#CBD5E1] rounded-lg shadow-subtle transition-all duration-150 flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2"
               title="Refrescar ventas"
               aria-label="Refrescar ventas"
             >
@@ -158,21 +159,22 @@ export default function DailySalesPage() {
         </div>
 
         {data.sales.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[#64748B]">
-            No se registraron cobros ni ventas para esta fecha.
+          <div className="p-8 text-center text-xs text-[#64748B] animate-fade-in">
+            <Receipt className="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
+            <p>No se registraron cobros ni ventas para esta fecha.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full min-w-[760px] text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-[#F8FAFC] border-b border-[#DCE4EE] text-[#64748B] font-semibold text-[11px] uppercase tracking-wider">
-                  <th className="py-2.5 px-3">Hora</th>
-                  <th className="py-2.5 px-3">Boleto</th>
-                  <th className="py-2.5 px-3">Cliente</th>
-                  <th className="py-2.5 px-3">Teléfono</th>
-                  <th className="py-2.5 px-3">Monto Pagado</th>
-                  <th className="py-2.5 px-3">Equivalente USD</th>
-                  <th className="py-2.5 px-3">Detalle / Notas</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Hora</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Boleto</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Cliente</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Teléfono</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Monto Pagado</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Equivalente USD</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Detalle / Notas</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DCE4EE]">

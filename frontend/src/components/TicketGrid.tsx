@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, Calendar, Award, Sparkles, Clock, AlertTriangle } from 'lucide-react';
+import { Search, SearchX, Calendar, Award, Sparkles, Clock, AlertTriangle } from 'lucide-react';
 import { ExchangeRate, Raffle, Ticket } from '@/lib/types';
 import { formatDrawDate } from '@/lib/ticketSchemes';
 import TicketDetailModal from './TicketDetailModal';
@@ -167,24 +167,28 @@ export default function TicketGrid({
   }, [tickets, search, statusFilter, dateFilter, gameFilter]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-fade-in-up">
       {/* Barra de Filtros y Búsqueda */}
       <div className="bg-[#FFFFFF] p-3.5 sm:p-4 border border-[#DCE4EE] rounded-lg shadow-subtle space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Buscador */}
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-[#64748B]" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por número (07), cliente o teléfono..."
-              className="w-full pl-10 pr-10 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs placeholder-[#64748B] focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] transition-colors"
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Buscar boletos por número, cliente o teléfono"
+              className="w-full pl-10 pr-11 py-2.5 sm:py-2 min-h-[44px] bg-[#EAF0F6] border border-[#DCE4EE] rounded-lg text-[#0B1526] text-base sm:text-xs placeholder-[#64748B] focus:outline-none focus:border-[#0EA5E9] focus:bg-[#FFFFFF] focus-visible:ring-2 focus-visible:ring-[#0EA5E9]/30 transition-colors"
             />
             {search && (
               <button
+                type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-2 top-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center text-xs text-[#64748B] hover:text-[#0B1526]"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-md text-xs text-[#64748B] hover:text-[#0B1526] hover:bg-[#DCE4EE] transition-colors"
                 aria-label="Limpiar búsqueda"
               >
                 ✕
@@ -219,11 +223,13 @@ export default function TicketGrid({
               return (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setStatusFilter(tab.id as any)}
-                  className={`min-h-[40px] flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                  aria-pressed={active}
+                  className={`min-h-[40px] flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-1 ${
                     active
                       ? `bg-[#FFFFFF] ${tab.activeClass} border border-[#CBD5E1] shadow-subtle`
-                      : 'text-[#475569] hover:text-[#0B1526] hover:bg-[#FFFFFF]'
+                      : 'text-[#475569] hover:text-[#0B1526] hover:bg-[#FFFFFF] border border-transparent'
                   }`}
                 >
                   <span>{tab.label}</span>
@@ -257,12 +263,15 @@ export default function TicketGrid({
               options={gameOptions}
               icon={<Award className="w-3.5 h-3.5 text-[#854D0E] flex-shrink-0" />}
               label="Juegos Especiales:"
-              variant={gameFilter !== 'all' ? 'amber' : 'amber'}
+              variant="amber"
               className="w-full sm:w-auto"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg text-xs text-[#64748B] shadow-subtle ml-auto">
+          <div
+            aria-live="polite"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg text-xs text-[#64748B] shadow-subtle ml-auto"
+          >
             <span>Mostrando</span>
             <span className="font-mono tabular-nums font-bold text-[#0B1526]">{filteredTickets.length}</span>
             <span>de</span>
@@ -273,16 +282,18 @@ export default function TicketGrid({
 
       {/* Matriz de Boletos */}
       {filteredTickets.length === 0 ? (
-        <div className="p-10 text-center bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle">
+        <div className="p-10 text-center bg-[#FFFFFF] border border-[#DCE4EE] rounded-lg shadow-subtle animate-fade-in-up">
+          <SearchX className="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
           <p className="text-xs text-[#475569]">No se encontraron boletos con los filtros seleccionados.</p>
           <button
+            type="button"
             onClick={() => {
               setSearch('');
               setStatusFilter('all');
               setDateFilter('all');
               setGameFilter('all');
             }}
-            className="mt-2 min-h-[44px] px-4 py-2 bg-[#EAF0F6] text-xs text-[#0369A1] font-semibold rounded-lg hover:bg-[#DCE4EE] transition-colors"
+            className="mt-2 min-h-[44px] px-4 py-2 bg-[#EAF0F6] text-xs text-[#0369A1] font-semibold rounded-lg hover:bg-[#DCE4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2 transition-colors"
           >
             Limpiar Filtros
           </button>
@@ -307,8 +318,10 @@ export default function TicketGrid({
             return (
               <button
                 key={ticket.id}
+                type="button"
                 onClick={() => openTicketDetail(ticket)}
-                className={`relative p-1.5 sm:p-2 rounded-lg text-center border transition-all duration-150 flex flex-col items-center justify-between min-h-[72px] sm:min-h-[76px] shadow-subtle min-w-0 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2 ${
+                aria-label={`Boleto ${ticket.ticket_number}, ${isPaid ? 'pagado' : isReserved ? 'apartado' : 'disponible'}${ticket.customer_name ? `, ${ticket.customer_name}` : ''}`}
+                className={`relative p-1.5 sm:p-2 rounded-lg text-center border transition-all duration-150 flex flex-col items-center justify-between min-h-[72px] sm:min-h-[76px] shadow-subtle min-w-0 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F4F7FA] ${
                   isPaid
                     ? 'bg-[#ECFDF5] border-2 border-[#059669] hover:border-[#047857]'
                     : isReserved
@@ -396,7 +409,10 @@ export default function TicketGrid({
 
                 {isReserved && (
                   <div className="w-full h-1 bg-[#EAF0F6] rounded-full overflow-hidden mt-1">
-                    <div className="h-full bg-[#0EA5E9] rounded-full" style={{ width: `${ticket.percent_paid}%` }} />
+                    <div
+                      className="h-full bg-[#0EA5E9] rounded-full transition-[width] duration-500 ease-out"
+                      style={{ width: `${ticket.percent_paid}%` }}
+                    />
                   </div>
                 )}
               </button>

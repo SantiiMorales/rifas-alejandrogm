@@ -91,8 +91,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!authChecked || !isAuthenticated) {
     return (
-      <div className="min-h-dvh bg-[#F4F7FA] flex items-center justify-center">
+      <div className="min-h-dvh bg-[#F4F7FA] flex items-center justify-center animate-fade-in">
         <div className="text-center space-y-3">
+          <div className="w-12 h-12 rounded-xl bg-[#0B1526] border border-[#CBD5E1] shadow-subtle flex items-center justify-center mx-auto mb-1">
+            <span className="font-display text-xl font-extrabold text-[#0EA5E9]">GM</span>
+          </div>
           <div className="w-8 h-8 border-2 border-[#0369A1] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs text-[#64748B] font-medium">Verificando sesión...</p>
         </div>
@@ -120,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               logoutAdmin();
               router.replace('/admin/login');
             }}
-            className="min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFFFF] hover:bg-red-50 text-[#64748B] hover:text-red-600 border border-[#DCE4EE] hover:border-red-200 rounded-lg text-xs font-semibold shadow-subtle transition-colors"
+            className="min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFFFF] hover:bg-red-50 text-[#64748B] hover:text-red-600 border border-[#DCE4EE] hover:border-red-200 rounded-lg text-xs font-semibold shadow-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
             title="Cerrar Sesión"
           >
             <LogOut className="w-3.5 h-3.5 flex-shrink-0" />

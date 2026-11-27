@@ -510,7 +510,11 @@ export default function FinanceCharts({
       </div>
 
       {/* Canvas del Gráfico con Eje Y y Barras con Altura Exacta en Píxeles */}
-      <div className="p-3 sm:p-5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg">
+      <div
+        role="group"
+        aria-label="Gráfico de recaudación por período y monedas"
+        className="p-3 sm:p-5 bg-[#F4F7FA] border border-[#DCE4EE] rounded-lg"
+      >
         {validData.length === 0 ? (
           <div className="p-12 text-center text-xs text-[#64748B] space-y-2">
             <BarChart3 className="w-8 h-8 text-[#CBD5E1] mx-auto" />
@@ -621,7 +625,23 @@ export default function FinanceCharts({
                                 anchorBottom: rect.bottom,
                               });
                             }}
-                            className={`relative flex-1 min-w-[28px] sm:min-w-[36px] h-full flex flex-col items-center justify-end group cursor-pointer select-none transition-all duration-200 ${
+                            onFocus={(e) => {
+                              const barAnchor = e.currentTarget.querySelector('.bar-anchor') as HTMLElement | null;
+                              const targetEl = barAnchor || e.currentTarget;
+                              const rect = targetEl.getBoundingClientRect();
+                              setActiveTooltip({
+                                index: idx,
+                                item,
+                                anchorX: rect.left + rect.width / 2,
+                                anchorY: rect.top,
+                                anchorBottom: rect.bottom,
+                              });
+                            }}
+                            onBlur={() => setActiveTooltip(null)}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Ver detalle de ${parseDateDisplay(item.date_label).badgeText}: ${displayValText}`}
+                            className={`relative flex-1 min-w-[28px] sm:min-w-[36px] h-full flex flex-col items-center justify-end group cursor-pointer select-none transition-all duration-200 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2 ${
                               isAnotherHovered ? 'opacity-40' : 'opacity-100'
                             }`}
                           >
