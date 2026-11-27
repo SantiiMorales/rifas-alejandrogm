@@ -257,7 +257,7 @@ export default function TicketDetailModal({
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
       const ticketUrl = `${origin}/consultar?raffle=${raffle.id}&ticket=${encodeURIComponent(ticket.ticket_number)}`;
       const statusText = isPaid
-        ? 'PAGADO TOTAL (100%)'
+        ? 'BOLETO CANCELADO (100%)'
         : `ABONADO $${ticket.total_paid_usd} USD (Saldo restante: $${ticket.balance_usd} USD)`;
 
       const numbersLabel =
